@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Plazas de Garaje</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container parking-container">
+        <!-- Primera fila: Rampa y plazas superiores -->
+        <div class="parking-row">
+            <div class="label rampa">RAMPA</div>
+            {% for space in layout.superior %}
+                <form method="post" action="/toggle/{{ space.id }}">
+                    <button type="submit" class="parking-space {% if space.occupied %}occupied{% else %}free{% endif %}{% if space.id in [16,23,35] %} pastel{% endif %}">
+                        {% if space.occupied %}
+                            <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                        {% elif space.id in [16, 23, 35] %}
+                            <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
+                            {{ space.id }}
+                        {% else %}
+                            {{ space.id }}
+                        {% endif %}
+                    </button>
+                </form>
+            {% endfor %}
+            <div class="label rampa">RAMPA</div>
+        </div>
+        <!-- Segunda fila: Bloques centrales con escaleras -->
+        <div class="parking-row">
+            <div class="label escaleras">
+                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras" style="width: 40px; height: 40px;">
+            </div>
+            <div class="block block-center">
+                <div class="parking-row">
+                    {% for space in layout.bloque_izq[0:6] %}
+                        <form method="post" action="/toggle/{{ space.id }}">
+                            <button type="submit" class="parking-space {% if space.occupied %}occupied{% else %}free{% endif %}{% if space.id in [16,23,35] %} pastel{% endif %}">
+                                {% if space.occupied %}
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                                {% elif space.id in [16, 23, 35] %}
+                                    <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
+                                    {{ space.id }}
+                                {% else %}
+                                    {{ space.id }}
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+                <div class="parking-row">
+                    {% for space in layout.bloque_izq[6:12] %}
+                        <form method="post" action="/toggle/{{ space.id }}">
+                            <button type="submit" class="parking-space {% if space.occupied %}occupied{% else %}free{% endif %}{% if space.id in [16,23,35] %} pastel{% endif %}">
+                                {% if space.occupied %}
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                                {% elif space.id in [16, 23, 35] %}
+                                    <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
+                                    {{ space.id }}
+                                {% else %}
+                                    {{ space.id }}
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="label escaleras">
+                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras" style="width: 40px; height: 40px;">
+            </div>
+            <div class="block block-center">
+                <div class="parking-row">
+                    {% for space in layout.bloque_der[0:6] %}
+                        <form method="post" action="/toggle/{{ space.id }}">
+                            <button type="submit" class="parking-space {% if space.occupied %}occupied{% else %}free{% endif %}{% if space.id in [16,23,35] %} pastel{% endif %}">
+                                {% if space.occupied %}
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                                {% elif space.id in [16, 23, 35] %}
+                                    <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
+                                    {{ space.id }}
+                                {% else %}
+                                    {{ space.id }}
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+                <div class="parking-row">
+                    {% for space in layout.bloque_der[6:12] %}
+                        <form method="post" action="/toggle/{{ space.id }}">
+                            <button type="submit" class="parking-space {% if space.occupied %}occupied{% else %}free{% endif %}{% if space.id in [16,23,35] %} pastel{% endif %}">
+                                {% if space.occupied %}
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                                {% elif space.id in [16, 23, 35] %}
+                                    <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
+                                    {{ space.id }}
+                                {% else %}
+                                    {{ space.id }}
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="label escaleras">
+                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras" style="width: 40px; height: 40px;">
+            </div>
+        </div>
+        <!-- Tercera fila: Plazas inferiores (exteriores) -->
+        <div class="parking-row">
+            {% for space in layout.inferior %}
+                <form method="post" action="/toggle/{{ space.id }}">
+                    <button type="submit" class="parking-space {% if space.occupied %}occupied{% else %}free{% endif %}{% if space.id in [16,23,35] %} pastel{% endif %}">
+                        {% if space.occupied %}
+                            <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                        {% elif space.id in [16, 23, 35] %}
+                            <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
+                            {{ space.id }}
+                        {% else %}
+                            {{ space.id }}
+                        {% endif %}
+                    </button>
+                </form>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
