@@ -10,5 +10,5 @@ class ParkingSpace:
         self.occupied = False
 
 # Lista de plazas de garaje, inicialmente todas libres (False = libre, True = ocupada)
-NUM_PLAZAS = 48
+NUM_PLAZAS = 66
 plazas = [False] * NUM_PLAZAS

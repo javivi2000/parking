@@ -11,9 +11,9 @@ layout = {
     # Bloque azul (izquierda, 12 plazas)
     "bloque_izq": [ParkingSpace(id=i) for i in range(11, 23)],
     # Bloque verde (derecha, 12 plazas)
-    "bloque_der": [ParkingSpace(id=i) for i in range(23, 35)],
+    "bloque_der": [ParkingSpace(id=i) for i in range(23, 45)],
     # Plazas inferiores (gris, 16 plazas)
-    "inferior": [ParkingSpace(id=i) for i in range(35, 51)],
+    "inferior": [ParkingSpace(id=i) for i in range(45, 78)],
 }
 
 @routes.route('/', methods=['GET', 'POST'])
