@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Solicitud de Plaza</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='parking_volunteer.css') }}">
+    <link rel="icon" type="image/png" href="cruz.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <form method="POST" action="{{ url_for('views_volunteer.guardar') }}">
+        <h2>Acceso a Parking – Movilidad y Voluntariado - Sede Provincial de Alicante</h2>
+
+        <label for="apellidos_nombre">Apellidos, Nombre:</label>
+        <input type="text" id="apellidos_nombre" name="apellidos_nombre" placeholder="Ej: García López, Ana" required pattern="^.+\s.+$" title="Debe ingresar al menos un nombre y un apellido">
+
+        <label for="dni">DNI/NIF/NIE:</label>
+        <input type="text" id="dni" name="dni" placeholder="Introduce tu DNI/NIF/NIE" required pattern="^([0-9]{8}[A-Za-z]|[XYZxyz][0-9]{7}[A-Za-z])$" title="Debe ser un DNI (8 números y una letra) o un NIE (X/Y/Z seguido de 7 números y una letra)">
+
+        <label for="telefono">Número de teléfono:</label>
+        <input type="tel" id="telefono" name="telefono" placeholder="Ej: 600123456" pattern="^[0-9]{9}$" required title="Debe ser un número de 9 cifras">
+
+        <label for="email">Dirección de correo electrónico:</label>
+        <input type="text" id="correo" name="correo" placeholder="Ej: nombre@dominio.com" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Debe ser un correo con formato nombre@dominio.com">
+
+        <label for="ambito">Ámbito Cruz Roja:</label>
+        <select id="ambito" name="ambito_id" required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">Oficina Autonómica</option>
+            <option value="2">Oficina Provincial</option>
+            <option value="3">Asamblea Local</option>
+            <option value="4">Otras</option>
+        </select>
+
+        <label for="frecuencia">Frecuencia prevista:</label>
+        <select id="frecuencia" name="frecuencia_id" required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">Menos de 1 vez/mes</option>
+            <option value="2">2 a 4 veces/mes</option>
+            <option value="3">2 a 5 veces/semana</option>
+            <option value="4">Diario</option>
+        </select>
+
+        <label for="tipo_plaza">Tipo de plaza solicitada:</label>
+        <select id="tipo_plaza" name="tipo_plaza_id" required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">Plaza MOVILIDAD personal Of. Prov.</option>
+            <option value="2">Plaza MOVILIDAD otros centros</option>
+            <option value="3">Plaza VOLUNTARIADO</option>
+        </select>
+
+        <label for="dias_semana">Día/s de la semana previstos:</label>
+        <select id="dias_semana" name="dias_semana" required>
+            <option value="">Seleccione una opción</option>
+            <option value="lunes_viernes">De Lunes a Viernes</option>
+            <option value="sabados_domingos">Sábados, domingos y festivos</option>
+            <option value="ambos">Ambos</option>
+        </select>
+
+        <label for="franja_horaria">Franja horaria prevista:</label>
+        <select id="franja_horaria" name="franja_horaria_id" required>
+            <option value="">Seleccione una opción</option>
+            <option value="1">De 7:30 a 19:30 h.</option>
+            <option value="2">De 19:30 a 7:00 h.</option>
+            <option value="3">24 h.</option>
+        </select>
+
+        <label for="mifare">¿Tienes tarjeta "MIFARE 1" de Cruz Roja de acceso apertura puertas o a impresora?</label>
+        <select id="mifare" name="mifare" required>
+            <option value="">Seleccione una opción</option>
+            <option value="si">Sí</option>
+            <option value="no">No</option>
+        </select>
+
+        <button type="submit">Enviar</button>
+    </form>
+        <div id="alerta-exito" style="display:none;">
+        <div class="alerta-contenido" style="background: #fff; border: 2.5px solid #388e3c; border-radius: 14px; box-shadow: 0 8px 32px #388e3c22; padding: 32px 40px; min-width: 280px; max-width: 95vw; position:relative;">
+            <span class="alerta-cerrar" onclick="document.getElementById('alerta-exito').style.display='none'" style="position:absolute;top:10px;right:18px;font-size:1.7em;color:#388e3c;cursor:pointer;">&times;</span>
+            <div style="display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#e8f5e9"/><path d="M7 13l3 3 7-7" stroke="#388e3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <strong style="color:#388e3c;font-size:1.25em;">¡Enviado!</strong>
+            <div style="margin:10px 0 18px 0;color:#388e3c;">Se ha enviado con éxito.</div>
+            <div id="resumen-datos" style="margin-top:0; text-align:left;"></div>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('formulario').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const apellidos_nombre = document.getElementById('apellidos_nombre').value;
+        const dni = document.getElementById('dni').value;
+        const telefono = document.getElementById('telefono').value;
+        const email = document.getElementById('email').value;
+        const ambito = document.getElementById('ambito').options[document.getElementById('ambito').selectedIndex].text;
+
+        fetch('/parking_access_volunteer/guardar', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById('alerta-exito').style.display = 'flex';
+                document.getElementById('formulario').style.display = 'none';
+                document.getElementById('resumen-datos').innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; font-size:1em;">
+                        <tr><td><strong>Nombre y Apellidos:</strong></td><td>${apellidos_nombre}</td></tr>
+                        <tr><td><strong>DNI/NIF/NIE:</strong></td><td>${dni}</td></tr>
+                        <tr><td><strong>Teléfono:</strong></td><td>${telefono}</td></tr>
+                        <tr><td><strong>Email:</strong></td><td>${email}</td></tr>
+                        <tr><td><strong>Ámbito:</strong></td><td>${ambito}</td></tr>
+                    </table>
+                `;
+            } else {
+                alert('Error al enviar el formulario. Inténtalo de nuevo.');
+            }
+        })
+        .catch(() => alert('Error al enviar el formulario. Inténtalo de nuevo.'));
+    });
+    </script>
+</body>
+</html>

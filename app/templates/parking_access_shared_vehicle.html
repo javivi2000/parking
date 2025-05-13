@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Datos de Plaza de Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='parking_shared_vehicle.css') }}">
+    <link rel="icon" type="image/png" href="cruz.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <form id="formulario-plaza" action="/parking_access_shared_vehicle/guardar" method="POST">
+        <h2>Acceso a Parking – Vehículo Compartido - Formulario de Autorización</h2>
+
+        <label for="nombre">Nombre y apellidos de la persona solicitante:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Ej: García López, Ana" required pattern="^.+\s.+$" title="Debe ingresar al menos un nombre y un apellido">
+
+        <label for="matricula">Matrícula del vehículo con el que ocupará la plaza:</label>
+        <input type="text" id="matricula" name="matricula" placeholder="Ej: 1234-ABC" required
+            pattern="^[0-9]{4}[A-Z]{3}$"
+            title="Debe ser una matrícula europea válida: exactamente 4 números seguidos de 3 letras, sin espacios ni guiones. Ejemplo: 1234ABC MAYUSCULAS">
+
+        <label for="periodoini">Periodo inicio solicitado:</label>
+        <input type="date" id="periodoini" name="periodoini" required>
+
+        <label for="periodofin">Periodo fin uso plaza compartida:</label>
+        <input type="date" id="periodofin" name="periodofin" placeholder="Ej: 30/06/2025" required>
+
+        <label for="telefono">Teléfono de contacto:</label>
+        <input type="tel" id="telefono" name="telefono" placeholder="Ej: 600123456" required pattern="^[0-9]{9}$" title="Debe tener 9 dígitos">
+
+        <label for="acompanante1">Acompañante nº1 nombre y apellidos:</label>
+        <input type="text" id="acompanante1" name="acompanante1" placeholder="Ej: Pérez Gómez, Juan" required pattern="^.+\s.+$" title="Debe ingresar al menos un nombre y un apellido">
+
+        <label for="acompanante2">Acompañante nº2 nombre y apellidos:</label>
+        <input type="text" id="acompanante2" name="acompanante2" placeholder="Ej: Martínez Ruiz, Laura" pattern="^.+\s.+$" title="Debe ingresar al menos un nombre y un apellido">
+
+        <label for="acompanante3">Acompañante nº3 nombre y apellidos ( * cumplimentar solo en caso necesario ):</label>
+        <input type="text" id="acompanante3" name="acompanante3" placeholder="Ej: Sánchez López, Pedro" pattern="^.+\s.+$" title="Debe ingresar al menos un nombre y un apellido si lo rellena">
+
+        <button type="submit">Enviar</button>
+    </form>
+    <div id="alerta-exito" style="display:none;">
+        <div class="alerta-contenido" style="background: #fff; border: 2.5px solid #388e3c; border-radius: 14px; box-shadow: 0 8px 32px #388e3c22; padding: 32px 40px; min-width: 280px; max-width: 95vw; position:relative;">
+            <span class="alerta-cerrar" onclick="document.getElementById('alerta-exito').style.display='none'" style="position:absolute;top:10px;right:18px;font-size:1.7em;color:#388e3c;cursor:pointer;">&times;</span>
+            <div style="display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#e8f5e9"/><path d="M7 13l3 3 7-7" stroke="#388e3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <strong style="color:#388e3c;font-size:1.25em;">¡Enviado!</strong>
+            <div style="margin:10px 0 18px 0;color:#388e3c;">Se ha enviado con éxito.</div>
+            <div id="resumen-datos" style="margin-top:0; text-align:left;"></div>
+        </div>
+    </div>
+    <script>
+    document.getElementById('formulario-plaza').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Recoge los datos del formulario
+        const nombre = document.getElementById('nombre').value;
+        const matricula = document.getElementById('matricula').value;
+        const periodoini = document.getElementById('periodoini').value;
+        const periodofin = document.getElementById('periodofin').value;
+        const telefono = document.getElementById('telefono').value;
+        const acompanante1 = document.getElementById('acompanante1').value;
+        const acompanante2 = document.getElementById('acompanante2').value;
+        const acompanante3 = document.getElementById('acompanante3').value;
+
+        // Envía el formulario por AJAX
+        fetch('/parking_access_shared_vehicle/guardar', {
+            method: 'POST',
+            body: new FormData(this)
+        })
+        .then(response => {
+            if (response.ok) {
+                // Muestra la alerta bonita
+                document.getElementById('alerta-exito').style.display = 'flex';
+                document.getElementById('formulario-plaza').style.display = 'none';
+                document.getElementById('resumen-datos').innerHTML = `
+                     <table style="width:100%; border-collapse:collapse; font-size:1em;">
+                        <tr><td style="padding:4px 8px;"><strong>Nombre y apellidos:</strong></td><td style="padding:4px 8px;">${nombre}</td></tr>>
+                        <tr><td style="padding:4px 8px;"><strong>Matrícula:</strong></td><td style="padding:4px 8px;">${matricula}</td></tr>
+                        <tr><td style="padding:4px 8px;"><strong>Periodo inicio:</strong></td><td style="padding:4px 8px;">${periodoini}</td></tr>
+                        <tr><td style="padding:4px 8px;"><strong>Periodo fin:</strong></td><td style="padding:4px 8px;">${periodofin}</td></tr>
+                        <tr><td style="padding:4px 8px;"><strong>Teléfono:</strong></td><td style="padding:4px 8px;">${telefono}</td></tr>
+                        <tr><td style="padding:4px 8px;"><strong>Acompañante nº1:</strong></td><td style="padding:4px 8px;">${acompanante1}</td></tr>
+                        <tr><td style="padding:4px 8px;"><strong>Acompañante nº2:</strong></td><td style="padding:4px 8px;">${acompanante2}</td></tr>
+                        <tr><td style="padding:4px 8px;"><strong>Acompañante nº3:</strong></td><td style="padding:4px 8px;">${acompanante3}</td></tr>
+                    </table>
+                `;
+            } else {
+                alert('Error al enviar el formulario. Inténtalo de nuevo.');
+            }
+        })
+        .catch(() => alert('Error al enviar el formulario. Inténtalo de nuevo.'));
+    });
+    </script>
+</body>
+</html>

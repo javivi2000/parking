@@ -29,7 +29,7 @@
                             {% if space.id in [45, 68] %}
                                 <img src="{{ url_for('static', filename='bike-occupied.png') }}" alt="Moto Ocupada" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
                             {% else %}
-                                <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                                <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
                             {% endif %}
                         {% elif space.id in [16, 46, 50] %}
                             <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
@@ -74,7 +74,7 @@
                                     {% if space.id in [45, 68] %}
                                         <img src="{{ url_for('static', filename='bike-occupied.png') }}" alt="Moto Ocupada" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
                                     {% else %}
-                                        <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                                        <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
                                     {% endif %}
                                 {% elif space.id in [16, 46, 50] %}
                                     <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
@@ -117,7 +117,7 @@
                                     {% if space.id in [45, 68] %}
                                         <img src="{{ url_for('static', filename='bike-occupied.png') }}" alt="Moto Ocupada" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
                                     {% else %}
-                                        <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:28px; height:40px; display:block; margin:0 auto 4px;">
+                                        <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
                                     {% endif %}
                                 {% elif space.id in [16, 46, 50] %}
                                     <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
@@ -180,7 +180,7 @@
                                 {% if space.id in [34,35,36,37] %}compartido{% endif %}
                                 {% if space.id in [45] %}moto{% endif %}">
                                 {% if space.occupied %}
-                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:22px; height:32px; display:block; margin:0 auto 2px;">
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
                                 {% elif space.id in [16, 46, 50] %}
                                     <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:18px; height:18px; display:block; margin:0 auto 2px;">
                                     {{ space.id }}
