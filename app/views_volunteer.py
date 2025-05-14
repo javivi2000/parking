@@ -1,44 +1,67 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models import db, Solicitud, SolicitudDiasFranja
+from flask import Blueprint, render_template, request, jsonify
+from app.models import db, Solicitante, Vehiculo, PeriodoUso, Acompanante
+from datetime import datetime
 
+# Definición del Blueprint
 prueba1_bp = Blueprint('views_volunteer', __name__, template_folder='templates')
 
+# Ruta para mostrar el formulario
 @prueba1_bp.route('/parking_access_volunteer', methods=['GET'])
 def index():
     return render_template('parking_access_volunteer.html')
 
+# Ruta para procesar el formulario
 @prueba1_bp.route('/parking_access_volunteer/guardar', methods=['POST'])
 def guardar():
     try:
-        correo = request.form['email']
-        ambito_id = request.form['ambito_id']
-        frecuencia_id = request.form['frecuencia_id']
-        tipo_plaza_id = request.form['tipo_plaza_id']
-        mifare = request.form['mifare']
-        dias_semana = request.form['dias_semana']
-        franja_horaria_id = request.form['franja_horaria_id']
+        # Obtener los datos del formulario
+        apellidos_nombre = request.form.get('apellidos_nombre')
+        dni = request.form.get('dni')
+        telefono = request.form.get('telefono')
+        correo = request.form.get('correo')
+        ambito = request.form.get('ambito')
+        frecuencia = request.form.get('frecuencia')
+        tipo_plaza = request.form.get('tipo_plaza')
+        dias_semana = request.form.get('dias_semana')
+        franja_horaria_id = request.form.get('franja_horaria_id')
+        mifare = request.form.get('mifare')
 
-        solicitud = Solicitud(
-            correo=correo,
-            ambito_id=ambito_id,
-            frecuencia_id=frecuencia_id,
-            tipo_plaza_id=tipo_plaza_id,
-            mifare=mifare
+        # Crear nuevo solicitante
+        solicitante = Solicitante(
+            nombre=apellidos_nombre,
+            telefono=telefono,
+            correo=correo
         )
-        db.session.add(solicitud)
+        db.session.add(solicitante)
         db.session.commit()
 
-        solicitud_dia_franja = SolicitudDiasFranja(
-            solicitud_id=solicitud.id,
-            dias_semana=dias_semana,
-            franja_horaria_id=franja_horaria_id
+        # Crear el periodo de uso
+        periodo_uso = PeriodoUso(
+            solicitante_id=solicitante.id,
+            periodo_inicio='2025-05-14',
+            periodo_fin='2025-05-15'
         )
-        db.session.add(solicitud_dia_franja)
+        db.session.add(periodo_uso)
         db.session.commit()
 
-        flash('El formulario enviado con éxito', 'success')
-        return redirect(url_for('views_volunteer.index'))
+        # Respuesta JSON de éxito incluyendo los datos enviados
+        return jsonify({
+            'success': True,
+            'data': {
+                'apellidos_nombre': apellidos_nombre,
+                'dni': dni,
+                'telefono': telefono,
+                'correo': correo,
+                'ambito': ambito,
+                'frecuencia': frecuencia,
+                'tipo_plaza': tipo_plaza,
+                'dias_semana': dias_semana,
+                'franja_horaria_id': franja_horaria_id,
+                'mifare': mifare
+            }
+        })
+
     except Exception as e:
         db.session.rollback()
-        flash(f'Error al guardar los datos: {str(e)}', 'danger')
-        return redirect(url_for('views_volunteer.index'))
+        print(f"Error al guardar: {str(e)}")  # Agregar un print para ver el error en consola
+        return jsonify({'success': False, 'error': str(e)})

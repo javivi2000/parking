@@ -6,24 +6,27 @@ Una aplicación web construida con Flask para gestionar espacios de estacionamie
 
 ```
 parking-management-app
-├── app
-│   ├── __init__.py
-│   ├── config.py
-│   ├── models.py
-│   ├── routes.py
-│   ├── views_shared_vehicle.py
-│   ├── views_volunteer.py
+parking-management-app/
+├── app/
+│   ├── __init__.py                              # Inicializa la app Flask y registra Blueprints.
+│   ├── config.py                                # Configuración general, incluyendo base de datos.
+│   ├── models.py                                # Definición de modelos y estructura de la base de datos.
+│   ├── routes.py                                # Rutas principales para la gestión de plazas.
+│   ├── views_shared_vehicle.py                  # Gestión del formulario de acceso a vehículo compartido.
+│   ├── views_volunteer.py                       # Gestión del formulario de acceso para voluntarios.
 │   └── static/
-│   |   └── parking_shared_vehicle.css
-│   |   └── parking_volunteer.css
-│   |   └── styles.css
+│       └── landing.css                          # Estilos para la página principal.
+│       └── parking_shared_vehicle.css           # Estilos para el formulario de vehículo compartido.
+│       └── parking_volunteer.css                # Estilos para el formulario de voluntarios.
+│       └── styles.css                           # Estilos para del mapa de plazas.
 │   └── templates/
-│       └── index.html
-│       └── parking_access_shared_vehicle.html
-│       └── parking_access_volunteer.html
-├── requirements.txt
-├── README.md
-└── run.py
+│       └── index.html                           # Página del mapa de plazas.
+│       └── landing.html                         # Página de aterrizaje de la aplicación.
+│       └── parking_access_shared_vehicle.html   # Formulario de acceso para vehículos compartidos.
+│       └── parking_access_volunteer.html        # Formulario de acceso para voluntarios.
+├── requirements.txt                             # Dependencias del proyecto.
+├── README.md                                    # Documentación del proyecto.
+└── run.py                                       # Punto de entrada para iniciar la aplicación.
 ```
 ## Descripción
 

@@ -14,7 +14,7 @@ body {
 }
 
 /* Contenedor del formulario */
-form#formulario {
+form#formulario-voluntario {
     background: #fff;
     max-width: 480px;
     margin: 40px auto 0 auto;
@@ -28,7 +28,7 @@ form#formulario {
 }
 
 /* Título del formulario */
-form#formulario h2 {
+form#formulario-voluntario h2 {
     font-family: 'Montserrat', Arial, sans-serif;
     color: #b71c1c;
     font-size: 1.5em;
@@ -37,15 +37,13 @@ form#formulario h2 {
     font-weight: 600;
 }
 
-/* ...otros estilos previos... */
-
 .grupo-fecha-horas label[for="hora_llegada"],
 .grupo-fecha-horas label[for="hora_salida"] {
     font-size: 0.85em;
 }
 
 /* Estilo de las etiquetas */
-form#formulario label {
+form#formulario-voluntario label {
     font-weight: 600;
     color: #575050;
     margin-bottom: 4px;
@@ -54,8 +52,8 @@ form#formulario label {
 }
 
 /* Estilo de los campos de entrada y select */
-form#formulario input,
-form#formulario select {
+form#formulario-voluntario input,
+form#formulario-voluntario select {
     font-size: 1em;
     padding: 10px 12px;
     border: 1.5px solid #b71c1c55;
@@ -80,8 +78,8 @@ form#formulario select {
 }
 
 /* Enfoque */
-form#formulario input:focus,
-form#formulario select:focus {
+form#formulario-voluntario input:focus,
+form#formulario-voluntario select:focus {
     border-color: #b71c1c;
     background: #fff;
 }
@@ -114,7 +112,7 @@ select:valid:focus,
 }
 
 /* Estilo del botón de envío */
-form#formulario button[type="submit"] {
+form#formulario-voluntario button[type="submit"] {
     background: #b71c1c;
     color: #fff;
     font-family: 'Montserrat', Arial, sans-serif;
@@ -129,7 +127,7 @@ form#formulario button[type="submit"] {
     box-shadow: 0 2px 8px #b71c1c22;
 }
 
-form#formulario button[type="submit"]:hover {
+form#formulario-voluntario button[type="submit"]:hover {
     background: #d32f2f;
 }
 
@@ -159,39 +157,18 @@ select:invalid:focus {
     flex-direction: column;
 }
 
-@media (max-width: 600px) {
-    form#formulario {
-        padding: 18px 6vw 18px 6vw;
-        max-width: 98vw;
-    }
-    .alerta-contenido {
-        padding: 18px 6vw !important;
-    }
-}
-
-@media (max-width: 500px) {
-    form {
-        padding: 10px 2vw 8px 2vw;
-        max-width: 98vw;
-    }
-    .grupo-fecha-horas {
-        flex-direction: column;
-        gap: 0;
-    }
-}
-
 /* Alerta de éxito personalizada */
-#alerta-exito {
+#alerta-exito-voluntario {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.15);
-    display: none; /* Se muestra con JS */
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 9999;
 }
 
-.alerta-contenido {
+.alerta-contenido-voluntario {
     background: #e8f5e9;
     color: #388e3c;
     border: 2px solid #388e3c;
@@ -205,7 +182,7 @@ select:invalid:focus {
     max-width: 90vw;
 }
 
-.alerta-cerrar {
+.alerta-cerrar-voluntario {
     position: absolute;
     top: 6px; right: 10px;
     font-size: 1.2em;

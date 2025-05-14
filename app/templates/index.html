@@ -215,6 +215,59 @@
                 {% endfor %}
             </div>
         </div>
+      <div class="leyenda">
+
+    <!-- Columna de colores -->
+    <div class="leyenda-colores">
+        <div class="leyenda-item">
+            <div class="color-box" style="background-color: #ffe082;"></div>
+            <span>Plaza asignada matrícula</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-box" style="background-color: #ff8a80;"></div>
+            <span>Vehículos de Cruz Roja</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-box" style="background-color: #98ffe5;"></div>
+            <span>Vehículos compartidos</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-box" style="background-color: #ce93d8;"></div>
+            <span>Movilidad personal</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-box" style="background-color: #ffb74d;"></div>
+            <span>Voluntariado</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="color-box" style="background-color: #ffe0b2;"></div>
+            <span>Movilidad otros centros</span>
+        </div>
     </div>
+
+    <!-- Columna de iconos -->
+    <div class="leyenda-iconos">
+        <div class="leyenda-item">
+            <div class="icon-box">
+                <img src="{{ url_for('static', filename='embarazada.png') }}" alt="Embarazada" style="width: 100%; height: 100%;">
+            </div>
+            <span>Mujer embarazada</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="icon-box">
+                <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Movilidad reducida" style="width: 100%; height: 100%;">
+            </div>
+            <span>Movilidad reducida</span>
+        </div>
+        <div class="leyenda-item">
+            <div class="icon-box" >
+                <img src="{{ url_for('static', filename='bike.png') }}" alt="Motocicletas" style="width: 100%; height: 100%;">
+            </div>
+            <span>Motocicletas autorizadas</span>
+        </div>
+    </div>
+
+</div>
+
 </body>
 </html>

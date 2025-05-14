@@ -1,0 +1,137 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilos generales */
+body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+}
+
+/* Contenedor principal */
+.container {
+    background: #fff;
+    max-width: 480px;
+    width: 100%;
+    padding: 36px 32px 28px 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(183, 28, 28, 0.1); /* Sombra suave */
+    border: 1.5px solid #b71c1c33;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    text-align: center;
+    z-index: 2;
+}
+
+/* Fondo gris para todo el documento */
+html, body {
+    background: #f7f7f7;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+h1 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    color: #b71c1c;
+    font-size: 2.5em;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Texto de introducción */
+p {
+    font-size: 1.2em;
+    color: #575050;
+    margin-bottom: 40px;
+}
+
+/* Agrupar las secciones */
+.section {
+    margin-bottom: 40px;
+}
+
+/* Lista de enlaces */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    margin: 20px 0;
+}
+
+ul li a {
+    display: inline-block;
+    background-color: transparent;
+    color: #b71c1c;
+    padding: 10px 18px;
+    border-radius: 5px;
+    border: 1.5px solid #b71c1c;
+    font-size: 1.1em;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    text-decoration: none;
+}
+
+ul li a:hover {
+    background-color: #b71c1c;
+    color: #fff;
+    border-color: #b71c1c;
+}
+
+ul li a:focus {
+    outline: none;
+    box-shadow: 0 0 8px #b71c1c;
+}
+
+/* Media Queries para dispositivos pequeños */
+@media (max-width: 600px) {
+    .container {
+        padding: 40px 20px;
+    }
+
+    h1 {
+        font-size: 2.5em;
+    }
+
+    p {
+        font-size: 1.1em;
+    }
+
+    ul li a {
+        font-size: 1em;
+        padding: 10px 18px;
+    }
+}
+
+@media (max-width: 500px) {
+    .container {
+        padding: 30px 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    p {
+        font-size: 1em;
+    }
+
+    ul li a {
+        font-size: 0.9em;
+        padding: 8px 14px;
+    }
+}

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 from .models import db
 from .views_shared_vehicle import prueba2_bp
-from .views_volunteer import prueba1_bp
+from app.views_volunteer import prueba1_bp
 from .routes import routes  
 import pymysql
 pymysql.install_as_MySQLdb()
@@ -13,6 +13,8 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
     app.secret_key = 'clave-secreta'  
+    app.config['SECRET_KEY'] = 'supersecreto123'
+
 
     # Configuración de la base de datos 
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI

@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <title>Formulario de Datos de Plaza de Parking</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='parking_shared_vehicle.css') }}">
-    <link rel="icon" type="image/png" href="cruz.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <form id="formulario-plaza" action="/parking_access_shared_vehicle/guardar" method="POST">
+    <!--<form id="formulario-plaza" action="/parking_access_shared_vehicle/guardar" method="POST">-->
+        <form id="formulario-plaza" method="POST" action="{{ url_for('views_shared_vehicle.guardar') }}">
         <h2>Acceso a Parking – Vehículo Compartido - Formulario de Autorización</h2>
 
         <label for="nombre">Nombre y apellidos de la persona solicitante:</label>

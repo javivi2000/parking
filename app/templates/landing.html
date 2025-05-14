@@ -1,0 +1,29 @@
+<!-- app/templates/landing.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal de Gestión de Parking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Portal de Gestión de Espacios de Estacionamiento</h1>
+        
+        <div class="section">
+            <p>Accede a la visualización del mapa de disponibilidad de plazas:</p>
+            <ul>
+                <li><a href="{{ url_for('routes.mapa') }}">Visualizar Plazas Disponibles</a></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <p>Selecciona el formulario según tu perfil de usuario:</p>
+            <ul>
+                <li><a href="http://127.0.0.1:5000/parking_access_volunteer">Formulario para Voluntarios</a></li>
+                <li><a href="http://127.0.0.1:5000/parking_access_shared_vehicle">Formulario para Vehículos Compartidos</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

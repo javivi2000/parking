@@ -2,13 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Formulario de Solicitud de Plaza</title>
+    <title>Formulario de Solicitud de Plaza para Voluntarios</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='parking_volunteer.css') }}">
     <link rel="icon" type="image/png" href="cruz.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <form method="POST" action="{{ url_for('views_volunteer.guardar') }}">
+    <form id="formulario-voluntario" method="POST" action="{{ url_for('views_volunteer.guardar') }}">
         <h2>Acceso a Parking – Movilidad y Voluntariado - Sede Provincial de Alicante</h2>
 
         <label for="apellidos_nombre">Apellidos, Nombre:</label>
@@ -20,106 +20,102 @@
         <label for="telefono">Número de teléfono:</label>
         <input type="tel" id="telefono" name="telefono" placeholder="Ej: 600123456" pattern="^[0-9]{9}$" required title="Debe ser un número de 9 cifras">
 
-        <label for="email">Dirección de correo electrónico:</label>
-        <input type="text" id="correo" name="correo" placeholder="Ej: nombre@dominio.com" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" title="Debe ser un correo con formato nombre@dominio.com">
+        <label for="correo">Dirección de correo electrónico:</label>
+        <input type="email" id="correo" name="correo" placeholder="Ej: nombre@dominio.com" required>
 
         <label for="ambito">Ámbito Cruz Roja:</label>
-        <select id="ambito" name="ambito_id" required>
+        <select id="ambito" name="ambito" required>
             <option value="">Seleccione una opción</option>
-            <option value="1">Oficina Autonómica</option>
-            <option value="2">Oficina Provincial</option>
-            <option value="3">Asamblea Local</option>
-            <option value="4">Otras</option>
+            <option value="Oficina Autonómica">Oficina Autonómica</option>
+            <option value="Oficina Provincial">Oficina Provincial</option>
+            <option value="Asamblea Local">Asamblea Local</option>
+            <option value="Otras">Otras</option>
         </select>
 
         <label for="frecuencia">Frecuencia prevista:</label>
-        <select id="frecuencia" name="frecuencia_id" required>
+        <select id="frecuencia" name="frecuencia" required>
             <option value="">Seleccione una opción</option>
-            <option value="1">Menos de 1 vez/mes</option>
-            <option value="2">2 a 4 veces/mes</option>
-            <option value="3">2 a 5 veces/semana</option>
-            <option value="4">Diario</option>
+            <option value="Menos de 1 vez/mes">Menos de 1 vez/mes</option>
+            <option value="2 a 4 veces/mes">2 a 4 veces/mes</option>
+            <option value="2 a 5 veces/semana">2 a 5 veces/semana</option>
+            <option value="Diario">Diario</option>
         </select>
 
         <label for="tipo_plaza">Tipo de plaza solicitada:</label>
-        <select id="tipo_plaza" name="tipo_plaza_id" required>
+        <select id="tipo_plaza" name="tipo_plaza" required>
             <option value="">Seleccione una opción</option>
-            <option value="1">Plaza MOVILIDAD personal Of. Prov.</option>
-            <option value="2">Plaza MOVILIDAD otros centros</option>
-            <option value="3">Plaza VOLUNTARIADO</option>
+            <option value="Plaza MOVILIDAD personal Of. Prov.">Plaza MOVILIDAD personal Of. Prov.</option>
+            <option value="Plaza MOVILIDAD otros centros">Plaza MOVILIDAD otros centros</option>
+            <option value="Plaza VOLUNTARIADO">Plaza VOLUNTARIADO</option>
         </select>
 
         <label for="dias_semana">Día/s de la semana previstos:</label>
         <select id="dias_semana" name="dias_semana" required>
             <option value="">Seleccione una opción</option>
-            <option value="lunes_viernes">De Lunes a Viernes</option>
-            <option value="sabados_domingos">Sábados, domingos y festivos</option>
-            <option value="ambos">Ambos</option>
+            <option value="De Lunes a Viernes">De Lunes a Viernes</option>
+            <option value="Sábados, domingos y festivos">Sábados, domingos y festivos</option>
+            <option value="Ambos">Ambos</option>
         </select>
 
         <label for="franja_horaria">Franja horaria prevista:</label>
         <select id="franja_horaria" name="franja_horaria_id" required>
             <option value="">Seleccione una opción</option>
-            <option value="1">De 7:30 a 19:30 h.</option>
-            <option value="2">De 19:30 a 7:00 h.</option>
-            <option value="3">24 h.</option>
+            <option value="De 7:30 a 19:30 h.">De 7:30 a 19:30 h.</option>
+            <option value="De 19:30 a 7:00 h.">De 19:30 a 7:00 h.</option>
+            <option value="24 h.">24 h.</option>
         </select>
 
-        <label for="mifare">¿Tienes tarjeta "MIFARE 1" de Cruz Roja de acceso apertura puertas o a impresora?</label>
+        <label for="mifare">¿Tienes tarjeta "MIFARE 1" de Cruz Roja?</label>
         <select id="mifare" name="mifare" required>
             <option value="">Seleccione una opción</option>
-            <option value="si">Sí</option>
-            <option value="no">No</option>
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
         </select>
 
         <button type="submit">Enviar</button>
     </form>
-        <div id="alerta-exito" style="display:none;">
-        <div class="alerta-contenido" style="background: #fff; border: 2.5px solid #388e3c; border-radius: 14px; box-shadow: 0 8px 32px #388e3c22; padding: 32px 40px; min-width: 280px; max-width: 95vw; position:relative;">
-            <span class="alerta-cerrar" onclick="document.getElementById('alerta-exito').style.display='none'" style="position:absolute;top:10px;right:18px;font-size:1.7em;color:#388e3c;cursor:pointer;">&times;</span>
-            <div style="display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#e8f5e9"/><path d="M7 13l3 3 7-7" stroke="#388e3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <strong style="color:#388e3c;font-size:1.25em;">¡Enviado!</strong>
-            <div style="margin:10px 0 18px 0;color:#388e3c;">Se ha enviado con éxito.</div>
-            <div id="resumen-datos" style="margin-top:0; text-align:left;"></div>
-        </div>
-    </div>
 
     <script>
-    document.getElementById('formulario').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(this);
-        const apellidos_nombre = document.getElementById('apellidos_nombre').value;
-        const dni = document.getElementById('dni').value;
-        const telefono = document.getElementById('telefono').value;
-        const email = document.getElementById('email').value;
-        const ambito = document.getElementById('ambito').options[document.getElementById('ambito').selectedIndex].text;
-
-        fetch('/parking_access_volunteer/guardar', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.ok) {
-                document.getElementById('alerta-exito').style.display = 'flex';
-                document.getElementById('formulario').style.display = 'none';
-                document.getElementById('resumen-datos').innerHTML = `
-                    <table style="width:100%; border-collapse:collapse; font-size:1em;">
-                        <tr><td><strong>Nombre y Apellidos:</strong></td><td>${apellidos_nombre}</td></tr>
-                        <tr><td><strong>DNI/NIF/NIE:</strong></td><td>${dni}</td></tr>
-                        <tr><td><strong>Teléfono:</strong></td><td>${telefono}</td></tr>
-                        <tr><td><strong>Email:</strong></td><td>${email}</td></tr>
-                        <tr><td><strong>Ámbito:</strong></td><td>${ambito}</td></tr>
-                    </table>
-                `;
-            } else {
-                alert('Error al enviar el formulario. Inténtalo de nuevo.');
-            }
-        })
-        .catch(() => alert('Error al enviar el formulario. Inténtalo de nuevo.'));
-    });
+        document.getElementById('formulario-voluntario').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const nuevaVentana = window.open('', '_blank');
+                    nuevaVentana.document.write(`
+                        <html>
+                        <head>
+                            <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
+                            <style>
+                                body { font-family: 'Montserrat', sans-serif; padding: 40px; text-align: center; }
+                                .alerta { background-color: #fff; border-radius: 12px; padding: 24px; max-width: 600px; margin: 0 auto; }
+                                .alerta h2 { color: #388e3c; }
+                                .alerta ul { list-style: none; padding: 0; }
+                                .alerta ul li { margin-bottom: 8px; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="alerta">
+                                <h2>¡Enviado con éxito!</h2>
+                                <ul>
+                                    ${Object.entries(data.data).map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    nuevaVentana.document.close();
+                }
+            })
+            .catch(() => {
+                alert("Ocurrió un error inesperado. Inténtalo nuevamente más tarde.");
+            });
+        });
     </script>
 </body>
 </html>
