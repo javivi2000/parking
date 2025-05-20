@@ -1,0 +1,80 @@
+body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    padding: 0;
+}
+
+form#formulario-voluntario {
+    background: #fff;
+    max-width: 480px;
+    margin: 40px auto 0 auto;
+    padding: 36px 32px 28px 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px #b71c1c22;
+    border: 1.5px solid #b71c1c33;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+form#formulario-voluntario h2, form#formulario-voluntario h3, form#formulario-voluntario h4 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    color: #b71c1c;
+    font-size: 1.5em;
+    margin-bottom: 18px;
+    text-align: center;
+    font-weight: 600;
+}
+
+form#formulario-voluntario label {
+    font-weight: 600;
+    color: #575050;
+    margin-bottom: 4px;
+    font-size: 1em;
+    letter-spacing: 0.01em;
+}
+
+form#formulario-voluntario input,
+form#formulario-voluntario select {
+    font-size: 1em;
+    padding: 10px 12px;
+    border: 1.5px solid #b71c1c55;
+    border-radius: 7px;
+    background: #fafafa;
+    margin-bottom: 6px;
+    transition: border 0.2s;
+    outline: none;
+}
+
+form#formulario-voluntario input:focus,
+form#formulario-voluntario select:focus {
+    border-color: #b71c1c;
+    background: #fff;
+}
+
+form#formulario-voluntario button[type="submit"] {
+    background: #b71c1c;
+    color: #fff;
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-weight: 600;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 7px;
+    padding: 12px 0;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px #b71c1c22;
+}
+
+form#formulario-voluntario button[type="submit"]:hover {
+    background: #d32f2f;
+}
+
+@media (max-width: 600px) {
+    form#formulario-voluntario {
+        padding: 18px 6vw 18px 6vw;
+        max-width: 98vw;
+    }
+}

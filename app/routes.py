@@ -1,32 +1,34 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify
-
 from .models import ParkingSpace
 
 routes = Blueprint('routes', __name__)
 
-# Ajusta los IDs para que no se repitan y sigan un orden lógico
+# Distribución de plazas
 layout = {
-    # 10 plazas superiores (gris, entre rampas)
     "superior": [ParkingSpace(id=i) for i in range(1, 11)],
-    # Bloque azul (izquierda, 12 plazas)
     "bloque_izq": [ParkingSpace(id=i) for i in range(11, 23)],
-    # Bloque verde (derecha, 12 plazas)
-    "bloque_der": [ParkingSpace(id=i) for i in range(23, 35)],
-    # Plazas inferiores (gris, 16 plazas)
-    "inferior": [ParkingSpace(id=i) for i in range(35, 51)],
+    "bloque_der": [ParkingSpace(id=i) for i in range(23, 45)],
+    "inferior": [ParkingSpace(id=i) for i in range(45, 78)],
 }
 
-@routes.route('/', methods=['GET', 'POST'])
-def index():
+# Página principal: landing.html
+@routes.route('/', methods=['GET'])
+def home():
+    return render_template('landing.html')
+
+# Página de mapa de plazas
+@routes.route('/mapa', methods=['GET', 'POST'])
+def mapa():
     if request.method == 'POST':
         space_id = int(request.form['space_id'])
         for block in layout.values():
             for space in block:
                 if space.id == space_id:
                     space.occupied = not space.occupied
-        return redirect(url_for('routes.index'))
+        return redirect(url_for('routes.mapa'))
     return render_template('index.html', layout=layout)
 
+# Lista plana de espacios
 parking_spaces = [space for block in layout.values() for space in block]
 
 @routes.route('/occupy/<int:space_id>', methods=['POST'])
@@ -52,4 +54,4 @@ def toggle(space_id):
             if space.id == space_id:
                 space.occupied = not space.occupied
                 break
-    return redirect(url_for('routes.index'))
+    return redirect(url_for('routes.mapa'))
