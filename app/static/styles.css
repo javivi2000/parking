@@ -107,23 +107,24 @@ Motocicletas y ciclomotores autorizados: (pon imagen: bike.png)
     justify-content: center;
     background: #ffe082 !important;
 }
-
 .leyenda {
     margin-top: 30px;
     padding: 20px;
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 40px;
     justify-content: center;
+    align-items: flex-start;
 }
 
-.leyenda-colores {
+.leyenda-colores,
+.leyenda-iconos {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
 }
 
-.leyenda-colores .leyenda-item,
-.leyenda-iconos .leyenda-item {
+.leyenda-item {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -131,31 +132,36 @@ Motocicletas y ciclomotores autorizados: (pon imagen: bike.png)
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 6px;
+    min-width: 220px;
+    box-sizing: border-box;
     transition: background-color 0.3s;
 }
 
-.leyenda-colores .leyenda-item:hover,
-.leyenda-iconos .leyenda-item:hover {
+.leyenda-item:hover {
     background-color: #f0f0f0;
 }
 
-.leyenda-colores .leyenda-item span,
-.leyenda-iconos .leyenda-item span {
+.leyenda-item span {
     font-size: 0.9em;
     font-weight: 500;
     color: #333;
 }
 
-.leyenda-colores .color-box,
-.leyenda-iconos .icon-box {
+.box {
     width: 24px;
     height: 24px;
     border-radius: 4px;
-}
-
-.leyenda-iconos {
+    flex-shrink: 0;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
+.box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 4px;
+}

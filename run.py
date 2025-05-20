@@ -1,6 +1,6 @@
 from app import create_app
-from app.views_volunteer import prueba1_bp
-from app.views_shared_vehicle import prueba2_bp
+from app.views_volunteer import views_volunteer_bp
+from app.views_shared_vehicle import views_shared_vehicle_bp
 
 app = create_app()
 

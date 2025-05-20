@@ -1,67 +1,87 @@
 from flask import Blueprint, render_template, request, jsonify
-from app.models import db, Solicitante, Vehiculo, PeriodoUso, Acompanante
-from datetime import datetime
+from app.models import db, Solicitante, Solicitud, SolicitudDiasFranja, Ambito  # Importa el modelo Ambito
+from sqlalchemy.exc import SQLAlchemyError
 
-# Definición del Blueprint
-prueba1_bp = Blueprint('views_volunteer', __name__, template_folder='templates')
+views_volunteer_bp = Blueprint('views_volunteer', __name__, template_folder='templates')
 
-# Ruta para mostrar el formulario
-@prueba1_bp.route('/parking_access_volunteer', methods=['GET'])
+@views_volunteer_bp.route('/parking_access_volunteer', methods=['GET'])
 def index():
     return render_template('parking_access_volunteer.html')
 
-# Ruta para procesar el formulario
-@prueba1_bp.route('/parking_access_volunteer/guardar', methods=['POST'])
+@views_volunteer_bp.route('/parking_access_volunteer/guardar', methods=['POST'])
 def guardar():
     try:
-        # Obtener los datos del formulario
-        apellidos_nombre = request.form.get('apellidos_nombre')
-        dni = request.form.get('dni')
-        telefono = request.form.get('telefono')
-        correo = request.form.get('correo')
-        ambito = request.form.get('ambito')
-        frecuencia = request.form.get('frecuencia')
-        tipo_plaza = request.form.get('tipo_plaza')
-        dias_semana = request.form.get('dias_semana')
-        franja_horaria_id = request.form.get('franja_horaria_id')
-        mifare = request.form.get('mifare')
+        nombre = request.form['nombre']
+        correo = request.form['correo']
+        telefono = request.form['telefono']
+        dni = request.form['dni']
+        ambito = request.form['ambito']
+        frecuencia = request.form['frecuencia']
+        tipo_plaza = request.form['tipo_plaza']
+        dias_semana = request.form['dias_semana']
+        franja_horaria = request.form['franja_horaria']
+        mifare = request.form.get('mifare', 'no')
 
-        # Crear nuevo solicitante
-        solicitante = Solicitante(
-            nombre=apellidos_nombre,
-            telefono=telefono,
-            correo=correo
-        )
-        db.session.add(solicitante)
-        db.session.commit()
+        # Validación básica
+        if not nombre or not correo or not dni or not telefono:
+            return 'Faltan campos obligatorios.', 400
 
-        # Crear el periodo de uso
-        periodo_uso = PeriodoUso(
+        # Validar que el ámbito exista
+        ambito_obj = Ambito.query.get(int(ambito))
+        if not ambito_obj:
+            return f'El ámbito con ID {ambito} no existe.', 400
+
+        # Buscar o crear el solicitante
+        solicitante = Solicitante.query.filter_by(correo=correo).first()
+        if not solicitante:
+            solicitante = Solicitante(
+                nombre=nombre,
+                correo=correo,
+                telefono=telefono,
+                dni=dni
+            )
+            db.session.add(solicitante)
+            db.session.flush()
+
+        # Crear solicitud
+        solicitud = Solicitud(
             solicitante_id=solicitante.id,
-            periodo_inicio='2025-05-14',
-            periodo_fin='2025-05-15'
+            correo=correo,  # Agregado para evitar que sea NULL
+            ambito_id=int(ambito),
+            frecuencia_id=int(frecuencia),
+            tipo_plaza_id=int(tipo_plaza),
+            mifare='si' if mifare == 'si' else 'no'
         )
-        db.session.add(periodo_uso)
+        db.session.add(solicitud)
+        db.session.flush()
+
+        # Días y franja horaria
+        solicitud_dia_franja = SolicitudDiasFranja(
+            solicitud_id=solicitud.id,
+            dias_semana=dias_semana,
+            franja_horaria_id=int(franja_horaria)
+        )
+        db.session.add(solicitud_dia_franja)
+
         db.session.commit()
 
-        # Respuesta JSON de éxito incluyendo los datos enviados
+        # Enviar respuesta JSON que espera el frontend
         return jsonify({
-            'success': True,
-            'data': {
-                'apellidos_nombre': apellidos_nombre,
-                'dni': dni,
-                'telefono': telefono,
-                'correo': correo,
-                'ambito': ambito,
-                'frecuencia': frecuencia,
-                'tipo_plaza': tipo_plaza,
-                'dias_semana': dias_semana,
-                'franja_horaria_id': franja_horaria_id,
-                'mifare': mifare
-            }
-        })
+            'nombre': nombre,
+            'dni': dni,
+            'telefono': telefono,
+            'correo': correo,
+            'ambito': ambito,
+            'frecuencia': frecuencia,
+            'tipoPlaza': tipo_plaza,
+            'diasSemana': dias_semana,
+            'franjaHoraria': franja_horaria,
+            'mifare': mifare
+        }), 200
 
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return f'Error al guardar en base de datos: {str(e)}', 500
     except Exception as e:
         db.session.rollback()
-        print(f"Error al guardar: {str(e)}")  # Agregar un print para ver el error en consola
-        return jsonify({'success': False, 'error': str(e)})
+        return f'Error inesperado: {str(e)}', 500

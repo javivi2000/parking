@@ -6,7 +6,6 @@ Una aplicación web construida con Flask para gestionar espacios de estacionamie
 
 ```
 parking-management-app
-parking-management-app/
 ├── app/
 │   ├── __init__.py                              # Inicializa la app Flask y registra Blueprints.
 │   ├── config.py                                # Configuración general, incluyendo base de datos.
@@ -15,10 +14,10 @@ parking-management-app/
 │   ├── views_shared_vehicle.py                  # Gestión del formulario de acceso a vehículo compartido.
 │   ├── views_volunteer.py                       # Gestión del formulario de acceso para voluntarios.
 │   └── static/
-│       └── landing.css                          # Estilos para la página principal.
-│       └── parking_shared_vehicle.css           # Estilos para el formulario de vehículo compartido.
-│       └── parking_volunteer.css                # Estilos para el formulario de voluntarios.
-│       └── styles.css                           # Estilos para del mapa de plazas.
+│   |   └── landing.css                          # Estilos para la página principal.
+│   |   └── parking_shared_vehicle.css           # Estilos para el formulario de vehículo compartido.
+│   |   └── parking_volunteer.css                # Estilos para el formulario de voluntarios.
+│   |   └── styles.css                           # Estilos para del mapa de plazas.
 │   └── templates/
 │       └── index.html                           # Página del mapa de plazas.
 │       └── landing.html                         # Página de aterrizaje de la aplicación.

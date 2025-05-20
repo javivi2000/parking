@@ -1,11 +1,3 @@
-/* Reset básico */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Estilos generales */
 body {
     font-family: 'Open Sans', Arial, sans-serif;
     background: #f7f7f7;
@@ -13,7 +5,6 @@ body {
     padding: 0;
 }
 
-/* Contenedor del formulario */
 form#formulario-voluntario {
     background: #fff;
     max-width: 480px;
@@ -27,8 +18,7 @@ form#formulario-voluntario {
     gap: 18px;
 }
 
-/* Título del formulario */
-form#formulario-voluntario h2 {
+form#formulario-voluntario h2, form#formulario-voluntario h3, form#formulario-voluntario h4 {
     font-family: 'Montserrat', Arial, sans-serif;
     color: #b71c1c;
     font-size: 1.5em;
@@ -37,12 +27,6 @@ form#formulario-voluntario h2 {
     font-weight: 600;
 }
 
-.grupo-fecha-horas label[for="hora_llegada"],
-.grupo-fecha-horas label[for="hora_salida"] {
-    font-size: 0.85em;
-}
-
-/* Estilo de las etiquetas */
 form#formulario-voluntario label {
     font-weight: 600;
     color: #575050;
@@ -51,7 +35,6 @@ form#formulario-voluntario label {
     letter-spacing: 0.01em;
 }
 
-/* Estilo de los campos de entrada y select */
 form#formulario-voluntario input,
 form#formulario-voluntario select {
     font-size: 1em;
@@ -64,54 +47,12 @@ form#formulario-voluntario select {
     outline: none;
 }
 
-.grupo-fecha-horas input[type="date"],
-.grupo-fecha-horas input[type="time"] {
-    width: 100%;
-    padding: 7px 8px;
-    margin-bottom: 14px;
-    border: 1.2px solid #f5333f;
-    border-radius: 4px;
-    font-size: 14px;
-    background: #fff;
-    color: #222;
-    transition: border 0.2s, box-shadow 0.2s;
-}
-
-/* Enfoque */
 form#formulario-voluntario input:focus,
 form#formulario-voluntario select:focus {
     border-color: #b71c1c;
     background: #fff;
 }
 
-.grupo-fecha-horas input[type="date"]:focus,
-.grupo-fecha-horas input[type="time"]:focus {
-    border: 2px solid #d32f2f;
-    outline: none;
-}
-
-/* Verde cuando el campo es válido y tiene contenido */
-input[type="text"]:valid,
-input[type="number"]:valid,
-select:valid,
-.grupo-fecha-horas input[type="date"]:valid,
-.grupo-fecha-horas input[type="time"]:valid {
-    border-color: #388e3c;
-    box-shadow: 0 0 0 1px #388e3c33;
-}
-
-/* Verde más intenso al enfocar un campo válido */
-input[type="text"]:valid:focus,
-input[type="number"]:valid:focus,
-select:valid:focus,
-.grupo-fecha-horas input[type="date"]:valid:focus,
-.grupo-fecha-horas input[type="time"]:valid:focus {
-    border-color: #2e7031;
-    box-shadow: 0 0 0 1.5px #388e3c55;
-    outline: none;
-}
-
-/* Estilo del botón de envío */
 form#formulario-voluntario button[type="submit"] {
     background: #b71c1c;
     color: #fff;
@@ -131,64 +72,9 @@ form#formulario-voluntario button[type="submit"]:hover {
     background: #d32f2f;
 }
 
-/* Mensajes de error */
-input:invalid,
-select:invalid {
-    border-color: #e53935;
-}
-
-input:invalid:focus,
-select:invalid:focus {
-    outline: none;
-    border-color: #e53935;
-}
-
-/* Grupo fecha y horas */
-.grupo-fecha-horas {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-    align-items: flex-end;
-}
-
-.grupo-fecha-horas > div {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Alerta de éxito personalizada */
-#alerta-exito-voluntario {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.15);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-.alerta-contenido-voluntario {
-    background: #e8f5e9;
-    color: #388e3c;
-    border: 2px solid #388e3c;
-    border-radius: 8px;
-    padding: 18px 14px;
-    font-size: 1em;
-    box-shadow: 0 4px 16px #388e3c22;
-    text-align: center;
-    position: relative;
-    min-width: 200px;
-    max-width: 90vw;
-}
-
-.alerta-cerrar-voluntario {
-    position: absolute;
-    top: 6px; right: 10px;
-    font-size: 1.2em;
-    color: #388e3c;
-    cursor: pointer;
-    background: none;
-    border: none;
-    outline: none;
+@media (max-width: 600px) {
+    form#formulario-voluntario {
+        padding: 18px 6vw 18px 6vw;
+        max-width: 98vw;
+    }
 }

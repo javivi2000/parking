@@ -3,15 +3,15 @@ from app.models import db, Solicitante, Vehiculo, PeriodoUso, Acompanante
 from datetime import datetime
 
 # Definición del Blueprint
-prueba2_bp = Blueprint('views_shared_vehicle', __name__, template_folder='templates')
+views_shared_vehicle_bp = Blueprint('views_shared_vehicle', __name__, template_folder='templates')
 
 # Ruta para mostrar el formulario
-@prueba2_bp.route('/parking_access_shared_vehicle', methods=['GET'])
+@views_shared_vehicle_bp.route('/parking_access_shared_vehicle', methods=['GET'])
 def index():
     return render_template('parking_access_shared_vehicle.html')
 
 # Ruta para procesar el formulario
-@prueba2_bp.route('/parking_access_shared_vehicle/guardar', methods=['POST'])
+@views_shared_vehicle_bp.route('/parking_access_shared_vehicle/guardar', methods=['POST'])
 def guardar():
     try:
         # Obtener los datos del formulario
