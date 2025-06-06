@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Formulario de Solicitud de Plaza para Voluntarios</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='parking_volunteer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='parking_forms.css') }}">
     <link rel="icon" type="image/png" href="cruz.png">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Open+Sans:wght@400&display=swap" rel="stylesheet">
 </head>
 <body>
-    <form id="formulario-voluntario" method="POST" action="{{ url_for('views_volunteer.guardar') }}">
+    <form id="formulario-voluntario" method="POST" action="{{ url_for('views.volunteer_guardar') }}">
         <h2>Acceso a Parking – Movilidad y Voluntariado - Sede Provincial de Alicante</h2>
 
         <label for="nombre">¿Cuál es tu nombre y apellidos?</label>
@@ -97,7 +97,11 @@
             // const nombre = document.getElementById('nombre').value;
             // ... demás variables, aunque no es obligatorio si envías FormData(this)
 
+<<<<<<< HEAD
             fetch('{{ url_for("views_volunteer.guardar") }}', {
+=======
+            fetch('{{ url_for("views.volunteer_guardar") }}', {
+>>>>>>> 921a981 (Mejoras en la interfaz visual del parking)
                 method: 'POST',
                 body: new FormData(this)
             })

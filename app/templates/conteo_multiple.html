@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estadísticas de Plazas</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-tr from-blue-50 to-indigo-100 min-h-screen p-6">
+  <div class="max-w-3xl mx-auto">
+    <!-- Encabezado principal -->
+    <header class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+      <h1 class="text-4xl font-extrabold text-indigo-800">Gestión de Plazas 🚗</h1>
+    </header>
+    <!-- Filtros -->
+    <form method="GET" action="{{ url_for('routes.conteo_multiple') }}" class="mb-6 bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row gap-4 items-center">
+      <div class="flex flex-col">
+        <label for="tipo_plaza" class="block text-sm font-medium text-gray-700">Tipo de Plaza:</label>
+        <select name="tipo_plaza" id="tipo_plaza" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+          <option value="">Todos</option>
+          {% for tipo in datos_plazas.keys() %}
+          <option value="{{ tipo }}" {% if request.args.get('tipo_plaza') == tipo %}selected{% endif %}>{{ tipo }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex flex-col">
+        <label for="fecha" class="block text-sm font-medium text-gray-700">Mes:</label>
+        <input type="month" name="fecha" id="fecha" value="{{ request.args.get('fecha', '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Seleccione un mes">
+      </div>
+      <button type="submit" class="mt-4 md:mt-0 bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition" aria-label="Aplicar filtros">
+        Filtrar
+      </button>
+    </form>
+    <!-- Tabla combinada -->
+    <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-resumen">
+      <h2 id="titulo-resumen" class="text-xl font-semibold text-gray-800 mb-6">Resumen por tipo de plaza</h2>
+      <table class="w-full text-sm text-left mx-auto max-w-3xl border-separate border-spacing-y-1" role="table" aria-describedby="desc-resumen">
+        <caption id="desc-resumen" class="sr-only">
+          Tabla que muestra el total, ocupadas, disponibles, solicitadas y ratio de ocupación por tipo de plaza
+        </caption>
+        <thead class="text-xs text-gray-600 uppercase bg-gray-100 rounded-lg">
+          <tr>
+            <th scope="col" class="px-4 py-3">Tipo de Plaza</th>
+            <th scope="col" class="px-4 py-3 text-center">Total Plazas</th>
+            <th scope="col" class="px-4 py-3 text-center">Plazas Ocupadas</th>
+            <th scope="col" class="px-4 py-3 text-center">Disponibles</th>
+            <th scope="col" class="px-4 py-3 text-center">Solicitadas</th>
+            <th scope="col" class="px-4 py-3 text-center">Porcentaje de Ocupación</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if datos_plazas %}
+            {% for tipo, datos in datos_plazas.items() %}
+              <tr class="hover:bg-indigo-50 transition-colors">
+                <th scope="row" class="px-4 py-3 font-medium text-gray-700">{{ tipo }}</th>
+                <td class="px-4 py-3 text-center">{{ datos.total }}</td>
+                <td class="px-4 py-3 text-center text-red-600 font-semibold">{{ datos.ocupadas }}</td>
+                <td class="px-4 py-3 text-center text-green-600 font-semibold">{{ datos.disponibles }}</td>
+                <td class="px-4 py-3 text-center text-blue-600 font-semibold">
+                  {{ datos_disponibilidad[tipo].solicitadas if tipo in datos_disponibilidad else 0 }}
+                </td>
+                <td class="px-4 py-3 text-center font-semibold">
+                  {{ datos_disponibilidad[tipo].ratio_ocupacion if tipo in datos_disponibilidad else 0 }}%
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center text-gray-500 py-4">No hay datos disponibles para mostrar.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+        <tfoot class="bg-gray-100">
+          <tr>
+            <th scope="row" class="px-4 py-3 font-medium text-gray-700">Total</th>
+            <td class="px-4 py-3 text-center">{{ total_conjunto.total }}</td>
+            <td class="px-4 py-3 text-center text-red-600 font-semibold">{{ total_conjunto.ocupadas }}</td>
+            <td class="px-4 py-3 text-center text-green-600 font-semibold">{{ total_conjunto.disponibles }}</td>
+            <td class="px-4 py-3 text-center text-blue-600 font-semibold">{{ total_solicitadas }}</td>
+            <td class="px-4 py-3 text-center font-semibold">
+              {{ total_ratio_ocupacion }}%
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+    <!-- Gráfico de ocupación histórica -->
+    <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-grafico">
+      <div class="flex justify-between items-center mb-6">
+        <h2 id="titulo-grafico" class="text-xl font-semibold text-gray-800">Ocupación y Solicitudes por Mes</h2>
+      </div>
+      <div id="graficos-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% if datos_graficos %}
+          <!-- Los gráficos individuales se generarán aquí -->
+        {% else %}
+          <p class="text-center text-gray-500">No hay datos disponibles para los gráficos.</p>
+        {% endif %}
+      </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const datosGraficos = {{ datos_graficos_json | safe }};
+      console.log("Datos recibidos para las gráficas:", datosGraficos);
+
+      const container = document.getElementById('graficos-container');
+
+      Object.keys(datosGraficos).forEach((tipo, index) => {
+        const datosTipo = datosGraficos[tipo];
+        if (!datosTipo || !Array.isArray(datosTipo.fechas) || !Array.isArray(datosTipo.ocupaciones)) {
+          return;
+        }
+
+        const chartContainer = document.createElement('div');
+        chartContainer.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'w-full', 'mb-8');
+
+        const chartTitle = document.createElement('h3');
+        chartTitle.textContent = tipo;
+        chartTitle.classList.add('text-xl', 'font-semibold', 'text-gray-800', 'mb-4', 'text-center');
+        chartContainer.appendChild(chartTitle);
+
+        const canvas = document.createElement('canvas');
+        canvas.id = `chart-${index}`;
+        canvas.style.height = '250px';
+        canvas.style.width = '100%';
+        chartContainer.appendChild(canvas);
+
+        container.appendChild(chartContainer);
+
+        const config = {
+          type: 'bar',
+          data: {
+            labels: datosTipo.fechas,
+            datasets: [
+              {
+                label: 'Ocupaciones',
+                data: datosTipo.ocupaciones,
+                backgroundColor: 'rgba(25, 118, 210, 0.3)',
+                borderColor: '#1976d2',
+                borderWidth: 1,
+                yAxisID: 'y',
+              },
+              {
+                label: 'Solicitudes',
+                data: datosTipo.solicitudes || [],
+                backgroundColor: 'rgba(255, 99, 132, 0.3)',
+                borderColor: '#ff6384',
+                borderWidth: 1,
+                yAxisID: 'y1',
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+              },
+            },
+            scales: {
+              x: { title: { display: true, text: 'Mes' } },
+              y: { title: { display: true, text: 'Ocupaciones' }, beginAtZero: true },
+              y1: { title: { display: true, text: 'Solicitudes' }, beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } },
+            },
+          },
+        };
+
+        new Chart(canvas.getContext('2d'), config);
+      });
+    </script>
+  </div>
+  {% if alertas %}
+  <section class="bg-red-50 border border-red-200 rounded-3xl shadow-xl p-6 mb-10">
+    <div class="flex items-center mb-6">
+      <svg class="w-8 h-8 text-red-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
+      </svg>
+      <h3 class="text-2xl font-bold text-red-600">Alertas de Alta Demanda</h3>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {% for alerta in alertas %}
+      <div class="flex items-center bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-red-100 transition">
+        <svg class="w-6 h-6 text-red-500 flex-shrink-0 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
+        </svg>
+        <p class="text-gray-700">{{ alerta }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</body>
+</html>
+
+
