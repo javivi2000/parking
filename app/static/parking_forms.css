@@ -1,3 +1,4 @@
+/* Base general común */
 body {
     font-family: 'Open Sans', Arial, sans-serif;
     background: #f7f7f7;
@@ -5,7 +6,9 @@ body {
     padding: 0;
 }
 
-form#formulario-plaza {
+/* Estilos comunes para ambos formularios */
+form#formulario-plaza,
+form#formulario-voluntario {
     background: #fff;
     max-width: 480px;
     margin: 40px auto 0 auto;
@@ -18,7 +21,12 @@ form#formulario-plaza {
     gap: 18px;
 }
 
-form#formulario-plaza h2, h3, h4 {
+form#formulario-plaza h2, 
+form#formulario-plaza h3, 
+form#formulario-plaza h4,
+form#formulario-voluntario h2, 
+form#formulario-voluntario h3, 
+form#formulario-voluntario h4 {
     font-family: 'Montserrat', Arial, sans-serif;
     color: #b71c1c;
     font-size: 1.5em;
@@ -27,17 +35,19 @@ form#formulario-plaza h2, h3, h4 {
     font-weight: 600;
 }
 
-form#formulario-plaza label {
+form#formulario-plaza label,
+form#formulario-voluntario label {
     font-weight: 600;
     color: #575050;
     margin-bottom: 4px;
     font-size: 1em;
     letter-spacing: 0.01em;
-    
 }
 
 form#formulario-plaza input,
-form#formulario-plaza select {
+form#formulario-plaza select,
+form#formulario-voluntario input,
+form#formulario-voluntario select {
     font-size: 1em;
     padding: 10px 12px;
     border: 1.5px solid #b71c1c55;
@@ -49,12 +59,15 @@ form#formulario-plaza select {
 }
 
 form#formulario-plaza input:focus,
-form#formulario-plaza select:focus {
+form#formulario-plaza select:focus,
+form#formulario-voluntario input:focus,
+form#formulario-voluntario select:focus {
     border-color: #b71c1c;
     background: #fff;
 }
 
-form#formulario-plaza button[type="submit"] {
+form#formulario-plaza button[type="submit"],
+form#formulario-voluntario button[type="submit"] {
     background: #b71c1c;
     color: #fff;
     font-family: 'Montserrat', Arial, sans-serif;
@@ -69,12 +82,15 @@ form#formulario-plaza button[type="submit"] {
     box-shadow: 0 2px 8px #b71c1c22;
 }
 
-form#formulario-plaza button[type="submit"]:hover {
+form#formulario-plaza button[type="submit"]:hover,
+form#formulario-voluntario button[type="submit"]:hover {
     background: #d32f2f;
 }
 
+/* Responsive común para ambos */
 @media (max-width: 600px) {
-    form#formulario-plaza {
+    form#formulario-plaza,
+    form#formulario-voluntario {
         padding: 18px 6vw 18px 6vw;
         max-width: 98vw;
     }

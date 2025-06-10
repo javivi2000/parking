@@ -11,17 +11,10 @@
         <h1>Portal de Gestión de Espacios de Estacionamiento</h1>
         
         <div class="section">
-            <p>Accede a la visualización del mapa de disponibilidad de plazas:</p>
+            <p>Accede a la visualización del mapa de plazas o al panel de estadísticas:</p>
             <ul>
-                <li><a href="{{ url_for('routes.mapa') }}">Visualizar Plazas Disponibles</a></li>
-            </ul>
-        </div>
-
-        <div class="section">
-            <p>Selecciona el formulario según tu perfil de usuario:</p>
-            <ul>
-                <li><a href="http://127.0.0.1:5000/parking_access_volunteer">Formulario para Voluntarios</a></li>
-                <li><a href="http://127.0.0.1:5000/parking_access_shared_vehicle">Formulario para Vehículos Compartidos</a></li>
+                <li><a href="{{ url_for('routes.mapa') }}">Mapa de plazas en tiempo real</a></li>
+                <li><a href="http://localhost:5000/conteo_multiple">Estadísticas de ocupación</a></li>
             </ul>
         </div>
     </div>
