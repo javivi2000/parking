@@ -72,6 +72,7 @@ def mapa():
 # --- Cambiar estado plaza vía AJAX ---
 @routes.route('/toggle_estado/<int:plaza_id>', methods=['POST'])
 def toggle_estado(plaza_id):
+    from app.models import Plaza  # Importación dentro de la función
     plaza = Plaza.query.get_or_404(plaza_id)
     plaza.estado = not plaza.estado
     plaza.ultima_ocupacion = datetime.utcnow() if plaza.estado else None
@@ -100,153 +101,94 @@ def registrar_click(plaza_id):
 
 @routes.route('/conteo_multiple', methods=['GET'])
 def conteo_multiple():
-    # Obtener filtros desde la solicitud
     tipo_plaza_filtro = request.args.get('tipo_plaza', None)
     fecha_filtro = request.args.get('fecha', None)
 
-    # Validar tipo_plaza
-    if tipo_plaza_filtro and not TipoPlaza.query.filter_by(descripcion=tipo_plaza_filtro).first():
-        flash("Tipo de plaza no válido.", "danger")
-        return redirect(url_for('routes.conteo_multiple'))
+    # Datos de ejemplo con las plazas solicitadas
+    datos_plazas = {
+        "Motocicletas autorizadas": {"total": 20, "ocupadas": 10, "disponibles": 10},
+        "Movilidad reducida": {"total": 15, "ocupadas": 8, "disponibles": 7},
+        "Mujer embarazada": {"total": 10, "ocupadas": 5, "disponibles": 5},
+        "Plaza asignada matrícula": {"total": 25, "ocupadas": 20, "disponibles": 5},
+        "Plaza MOVILIDAD otros centros": {"total": 30, "ocupadas": 15, "disponibles": 15},
+        "Plaza MOVILIDAD personal Of. Prov.": {"total": 40, "ocupadas": 30, "disponibles": 10},
+        "Plaza VOLUNTARIADO": {"total": 50, "ocupadas": 30, "disponibles": 20},
+        "Vehículos compartidos": {"total": 35, "ocupadas": 25, "disponibles": 10},
+        "Vehículos de Cruz Roja": {"total": 10, "ocupadas": 7, "disponibles": 3},
+    }
 
-    # Validar fecha
-    try:
-        if fecha_filtro:
-            datetime.strptime(fecha_filtro, '%Y-%m')  # Asegura que el formato sea YYYY-MM
-    except ValueError:
-        flash("Fecha no válida.", "danger")
-        return redirect(url_for('routes.conteo_multiple'))
+    datos_graficos = {
+        "Motocicletas autorizadas": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [10, 12], "solicitudes": [5, 6]},
+        "Movilidad reducida": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [8, 9], "solicitudes": [3, 4]},
+        "Mujer embarazada": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [5, 6], "solicitudes": [2, 3]},
+        "Plaza asignada matrícula": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [20, 22], "solicitudes": [8, 10]},
+        "Plaza MOVILIDAD otros centros": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [15, 18], "solicitudes": [6, 7]},
+        "Plaza MOVILIDAD personal Of. Prov.": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [30, 32], "solicitudes": [10, 12]},
+        "Plaza VOLUNTARIADO": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [30, 35], "solicitudes": [10, 15]},
+        "Vehículos compartidos": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [25, 28], "solicitudes": [8, 9]},
+        "Vehículos de Cruz Roja": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [7, 8], "solicitudes": [2, 3]},
+    }
 
-    # Datos para la tabla de resumen
-    datos_plazas = {}
-    total_conjunto = {"total": 0, "ocupadas": 0, "disponibles": 0}
-    query = """
-        SELECT 
-            tp.descripcion AS tipo_plaza,
-            COUNT(p.id) AS total,
-            SUM(CASE WHEN p.estado = 1 THEN 1 ELSE 0 END) AS ocupadas,
-            SUM(CASE WHEN p.estado = 0 THEN 1 ELSE 0 END) AS disponibles
-        FROM plaza p
-        RIGHT JOIN tipo_plaza tp ON p.tipo_plaza_id = tp.id
-    """
-    where_clauses = []
+    # Aplicar filtro a los datos de la tabla
     if tipo_plaza_filtro:
-        where_clauses.append("tp.descripcion = :tipo_plaza")
-    if where_clauses:
-        query += " WHERE " + " AND ".join(where_clauses)
-    query += " GROUP BY tp.descripcion ORDER BY tp.descripcion"
+        datos_plazas = {tipo: datos for tipo, datos in datos_plazas.items() if tipo == tipo_plaza_filtro}
+        datos_graficos = {tipo: datos for tipo, datos in datos_graficos.items() if tipo == tipo_plaza_filtro}
 
-    rows = db.session.execute(text(query), {"tipo_plaza": tipo_plaza_filtro})
-    for row in rows:
-        tipo = row[0]
-        total = int(row[1])
-        ocupadas = int(row[2])
-        disponibles = int(row[3])
-        datos_plazas[tipo] = {
-            "total": total,
-            "ocupadas": ocupadas,
-            "disponibles": disponibles
+    # Calcular solicitudes y ratio de ocupación
+    datos_disponibilidad = {
+        tipo: {
+            "solicitadas": sum(datos["solicitudes"]),
+            "ratio_ocupacion": round((datos_plazas[tipo]["ocupadas"] / datos_plazas[tipo]["total"]) * 100, 2)
+            if datos_plazas[tipo]["total"] > 0 else 0
         }
-        total_conjunto["total"] += total
-        total_conjunto["ocupadas"] += ocupadas
-        total_conjunto["disponibles"] += disponibles
+        for tipo, datos in datos_graficos.items()
+    }
 
-    # Datos para la tabla de disponibilidad
-    datos_disponibilidad = {}
-    total_solicitadas = 0
-    solicitudes_query = """
-        SELECT 
-            tp.descripcion AS tipo_plaza,
-            COUNT(s.id) AS solicitadas
-        FROM tipo_plaza tp
-        LEFT JOIN solicitudes s ON s.tipo_plaza_id = tp.id
-    """
-    if where_clauses:
-        solicitudes_query += " WHERE " + " AND ".join(where_clauses)
-    solicitudes_query += " GROUP BY tp.descripcion"
+    # Calcular totales
+    total_conjunto = {
+        "total": sum(datos["total"] for datos in datos_plazas.values()),
+        "ocupadas": sum(datos["ocupadas"] for datos in datos_plazas.values()),
+        "disponibles": sum(datos["disponibles"] for datos in datos_plazas.values()),
+    }
+    total_solicitadas = sum(
+        datos["solicitadas"] for datos in datos_disponibilidad.values()
+    )
+    total_ratio_ocupacion = (
+        (total_conjunto["ocupadas"] / total_conjunto["total"]) * 100
+        if total_conjunto["total"] > 0
+        else 0
+    )
 
-    solicitudes_rows = db.session.execute(text(solicitudes_query), {"tipo_plaza": tipo_plaza_filtro})
-    for row in solicitudes_rows:
-        tipo = row[0]
-        solicitadas = int(row[1])
-        disponibles = datos_plazas[tipo]["disponibles"] if tipo in datos_plazas else 0
-        total = datos_plazas[tipo]["total"] if tipo in datos_plazas else 0
-        ratio = round((solicitadas / total) * 100, 2) if total > 0 else 0
-        datos_disponibilidad[tipo] = {
-            "total_disponibles": disponibles,
-            "solicitadas": solicitadas,
-            "ratio_ocupacion": ratio
-        }
-        total_solicitadas += solicitadas
-
-    # Calcular alertas
+    # Calcular alertas de alta demanda
     alertas = []
-    for tipo, datos in datos_disponibilidad.items():
-        if datos["solicitadas"] > datos["total_disponibles"]:
-            alertas.append(f"Alta demanda para {tipo}: {datos['solicitadas']} solicitudes y solo {datos['total_disponibles']} disponibles.")
-
-    # Calcular el ratio de ocupación total
-    total_ratio_ocupacion = round((total_conjunto["ocupadas"] / total_conjunto["total"]) * 100, 2) if total_conjunto["total"] > 0 else 0
-
-    # Crear datos para los gráficos agrupados por mes
-    datos_graficos = {}
-    historial_query = """
-        SELECT 
-            tp.descripcion AS tipo_plaza,
-            DATE_FORMAT(ho.fecha, '%Y-%m') AS mes,  -- Agrupa por mes y año
-            COUNT(ho.id) AS ocupaciones
-        FROM historial_ocupacion ho
-        JOIN tipo_plaza tp ON ho.tipo_plaza_id = tp.id
-    """
-    if fecha_filtro:
-        historial_query += " WHERE DATE_FORMAT(ho.fecha, '%Y-%m') = :fecha"
-    historial_query += " GROUP BY tp.descripcion, DATE_FORMAT(ho.fecha, '%Y-%m') ORDER BY tp.descripcion, mes"
-
-    historial_rows = db.session.execute(text(historial_query), {"fecha": fecha_filtro})
-    for row in historial_rows:
-        tipo = row[0]
-        mes = row[1]  # Ahora es el mes en formato 'YYYY-MM'
-        ocupaciones = int(row[2])
-        if tipo not in datos_graficos:
-            datos_graficos[tipo] = {"fechas": [], "ocupaciones": [], "solicitudes": []}
-        datos_graficos[tipo]["fechas"].append(mes)
-        datos_graficos[tipo]["ocupaciones"].append(ocupaciones)
-
-    # Agregar datos de solicitudes agrupados por mes
-    solicitudes_query = """
-        SELECT 
-            tp.descripcion AS tipo_plaza,
-            DATE_FORMAT(s.fecha_solicitud, '%Y-%m') AS mes,  -- Agrupa por mes y año
-            COUNT(s.id) AS solicitudes
-        FROM solicitudes s
-        JOIN tipo_plaza tp ON s.tipo_plaza_id = tp.id
-    """
-    if fecha_filtro:
-        solicitudes_query += " WHERE DATE_FORMAT(s.fecha_solicitud, '%Y-%m') = :fecha"
-    solicitudes_query += " GROUP BY tp.descripcion, DATE_FORMAT(s.fecha_solicitud, '%Y-%m') ORDER BY tp.descripcion, mes"
-
-    solicitudes_rows = db.session.execute(text(solicitudes_query), {"fecha": fecha_filtro})
-    for row in solicitudes_rows:
-        tipo = row[0]
-        mes = row[1]  # Ahora es el mes en formato 'YYYY-MM'
-        solicitudes = int(row[2])
-        if tipo not in datos_graficos:
-            datos_graficos[tipo] = {"fechas": [], "ocupaciones": [], "solicitudes": []}
-        if mes not in datos_graficos[tipo]["fechas"]:
-            datos_graficos[tipo]["fechas"].append(mes)
-            datos_graficos[tipo]["ocupaciones"].append(0)  # Asegura que ocupaciones tenga un valor
-        datos_graficos[tipo]["solicitudes"].append(solicitudes)
+    for tipo, datos in datos_graficos.items():
+        solicitudes = sum(datos["solicitudes"])
+        disponibles = datos_plazas.get(tipo, {}).get("disponibles", 0)
+        if solicitudes > disponibles:
+            alertas.append(
+                f"Alta demanda para {tipo}: {solicitudes} solicitudes y solo {disponibles} disponibles."
+            )
 
     return render_template(
         'conteo_multiple.html',
         datos_plazas=datos_plazas,
-        total_conjunto=total_conjunto,
-        datos_graficos=datos_graficos,
-        datos_graficos_json=json.dumps(datos_graficos),
         datos_disponibilidad=datos_disponibilidad,
+        datos_graficos_json=json.dumps(datos_graficos),
+        total_conjunto=total_conjunto,
         total_solicitadas=total_solicitadas,
-        total_ratio_ocupacion=total_ratio_ocupacion,
-        alertas=alertas
+        total_ratio_ocupacion=round(total_ratio_ocupacion, 2),
+        alertas=alertas,
+        datos_plazas_todos=json.dumps({
+            "Motocicletas autorizadas": {"total": 20, "ocupadas": 10, "disponibles": 10},
+            "Movilidad reducida": {"total": 15, "ocupadas": 8, "disponibles": 7},
+            "Mujer embarazada": {"total": 10, "ocupadas": 5, "disponibles": 5},
+            "Plaza asignada matrícula": {"total": 25, "ocupadas": 20, "disponibles": 5},
+            "Plaza MOVILIDAD otros centros": {"total": 30, "ocupadas": 15, "disponibles": 15},
+            "Plaza MOVILIDAD personal Of. Prov.": {"total": 40, "ocupadas": 30, "disponibles": 10},
+            "Plaza VOLUNTARIADO": {"total": 50, "ocupadas": 30, "disponibles": 20},
+            "Vehículos compartidos": {"total": 35, "ocupadas": 25, "disponibles": 10},
+            "Vehículos de Cruz Roja": {"total": 10, "ocupadas": 7, "disponibles": 3},
+        })  # <-- Pasa aquí todos los datos, no los filtrados
     )
 
 

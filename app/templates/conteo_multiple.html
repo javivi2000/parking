@@ -16,20 +16,13 @@
     <form method="GET" action="{{ url_for('routes.conteo_multiple') }}" class="mb-6 bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row gap-4 items-center">
       <div class="flex flex-col">
         <label for="tipo_plaza" class="block text-sm font-medium text-gray-700">Tipo de Plaza:</label>
-        <select name="tipo_plaza" id="tipo_plaza" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+        <select name="tipo_plaza" id="tipo_plaza" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" onchange="this.form.submit()">
           <option value="">Todos</option>
           {% for tipo in datos_plazas.keys() %}
           <option value="{{ tipo }}" {% if request.args.get('tipo_plaza') == tipo %}selected{% endif %}>{{ tipo }}</option>
           {% endfor %}
         </select>
       </div>
-      <div class="flex flex-col">
-        <label for="fecha" class="block text-sm font-medium text-gray-700">Mes:</label>
-        <input type="month" name="fecha" id="fecha" value="{{ request.args.get('fecha', '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Seleccione un mes">
-      </div>
-      <button type="submit" class="mt-4 md:mt-0 bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition" aria-label="Aplicar filtros">
-        Filtrar
-      </button>
     </form>
     <!-- Tabla combinada -->
     <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-resumen">
@@ -83,7 +76,31 @@
           </tr>
         </tfoot>
       </table>
+      <p class="text-sm text-gray-500 mt-4">
+        <strong>Nota:</strong> El <em>Porcentaje de Ocupación</em> indica la proporción de plazas ocupadas respecto al total disponible para cada tipo de plaza.
+      </p>
     </section>
+    <!-- Alertas de Alta Demanda -->
+    {% if alertas %}
+    <section class="bg-red-50 border border-red-200 rounded-3xl shadow-xl p-6 mb-10">
+      <div class="flex items-center mb-6">
+        <svg class="w-8 h-8 text-red-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
+        </svg>
+        <h3 class="text-2xl font-bold text-red-600">Alertas de Alta Demanda</h3>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for alerta in alertas %}
+        <div class="flex items-center bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-red-100 transition">
+          <svg class="w-6 h-6 text-red-500 flex-shrink-0 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
+          </svg>
+          <p class="text-gray-700">{{ alerta }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
     <!-- Gráfico de ocupación histórica -->
     <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-grafico">
       <div class="flex justify-between items-center mb-6">
@@ -97,12 +114,20 @@
         {% endif %}
       </div>
     </section>
+    <!-- Gráfico comparativo -->
+    <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-comparativo">
+      <h2 id="titulo-comparativo" class="text-xl font-semibold text-gray-800 mb-6 text-center">Comparativa de Ocupación y Disponibilidad</h2>
+      <div class="w-full flex justify-center overflow-x-auto">
+        <canvas id="graficoComparativo" class="w-full max-w-4xl min-w-[400px] min-h-[350px] max-h-[600px]" style="aspect-ratio: 2/1;"></canvas>
+      </div>
+    </section>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+      // Gráficos individuales (históricos) - estos usan los datos filtrados
       const datosGraficos = {{ datos_graficos_json | safe }};
-      console.log("Datos recibidos para las gráficas:", datosGraficos);
-
       const container = document.getElementById('graficos-container');
+      container.innerHTML = '';
 
       Object.keys(datosGraficos).forEach((tipo, index) => {
         const datosTipo = datosGraficos[tipo];
@@ -166,28 +191,43 @@
 
         new Chart(canvas.getContext('2d'), config);
       });
+
+      // Gráfico comparativo (siempre global)
+      const datosPlazasTodos = {{ datos_plazas_todos | safe }};
+      const tiposComparativa = Object.keys(datosPlazasTodos);
+      const ocupados = tiposComparativa.map(tipo => {
+        const plaza = datosPlazasTodos[tipo];
+        return plaza.total > 0 ? Math.round((plaza.ocupadas / plaza.total) * 100) : 0;
+      });
+      const disponibles = tiposComparativa.map(tipo => {
+        const plaza = datosPlazasTodos[tipo];
+        return plaza.total > 0 ? Math.round((plaza.disponibles / plaza.total) * 100) : 0;
+      });
+
+      new Chart(document.getElementById('graficoComparativo').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: tiposComparativa,
+          datasets: [
+            { label: 'Ocupación (%)', data: ocupados, backgroundColor: 'rgba(220, 38, 38, 0.7)' },
+            { label: 'Disponibles (%)', data: disponibles, backgroundColor: 'rgba(22, 163, 74, 0.7)' }
+          ]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { position: 'top', labels: { font: { size: 18 } } }
+          },
+          scales: {
+            x: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%', font: { size: 16 } } },
+            y: { ticks: { font: { size: 18 }, color: '#222' } }
+          }
+        }
+      });
     </script>
   </div>
-  {% if alertas %}
-  <section class="bg-red-50 border border-red-200 rounded-3xl shadow-xl p-6 mb-10">
-    <div class="flex items-center mb-6">
-      <svg class="w-8 h-8 text-red-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
-      </svg>
-      <h3 class="text-2xl font-bold text-red-600">Alertas de Alta Demanda</h3>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {% for alerta in alertas %}
-      <div class="flex items-center bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-red-100 transition">
-        <svg class="w-6 h-6 text-red-500 flex-shrink-0 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
-        </svg>
-        <p class="text-gray-700">{{ alerta }}</p>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
 </body>
 </html>
 

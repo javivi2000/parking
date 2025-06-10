@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <title>Gestión de Plazas de Garaje</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-
 <body>
     <div class="container parking-container">
 
@@ -15,10 +13,10 @@
         <div class="parking-row">
             <div class="label rampa">RAMPA</div>
             {% for space in layout.superior %}
-            <!-- Ejemplo para cada plaza in index.html -->
-            <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
-                <input type="hidden" name="space_id" value="{{ space.id }}">
-                <button type="submit" class="parking-space small-space
+                <!-- Ejemplo para cada plaza in index.html -->
+                <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
+                    <input type="hidden" name="space_id" value="{{ space.id }}">
+                    <button type="submit" class="parking-space small-space
                         {% if space.estado %}occupied{% else %}free{% endif %}
                         {% if space.id in [1,2,3,4,5,6,7,8,9,10] %}voluntariado{% endif %}
                         {% if space.id in [11,12,13,14,15,24,25,26,27,28,29,30,31,32,33] %}lila{% endif %}
@@ -29,13 +27,12 @@
                         {% if space.id in [42,43,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71] %}cruz-roja{% endif %}
                         {% if space.id in [34,35,36,37] %}compartido{% endif %}
                         {% if space.id in [45] %}moto{% endif %}">
-                    {% if space.estado %}
-                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche"
-                        style="width:30px; height:30px; display:block; margin:0 auto 4px;">
-                    {% endif %}
-                    <div class="plaza-numero">{{ space.tipo }}</div>
-                </button>
-            </form>
+                        {% if space.estado %}
+                            <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
+                        {% endif %}
+                        <div class="plaza-numero">{{ number_mapping[space.id] }}</div>
+                    </button>
+                </form>
             {% endfor %}
             <div class="label rampa">RAMPA</div>
         </div>
@@ -43,17 +40,16 @@
         <!-- Segunda fila: Bloques centrales con escaleras -->
         <div class="parking-row">
             <div class="label escaleras">
-                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras"
-                    style="width: 40px; height: 40px;">
+                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras" style="width: 40px; height: 40px;">
             </div>
             <div class="block block-center">
                 {% for row in [layout.bloque_izq[0:6], layout.bloque_izq[6:12]] %}
                 <div class="parking-row">
                     {% for space in row %}
-                    <!-- Ejemplo para cada plaza in index.html -->
-                    <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
-                        <input type="hidden" name="space_id" value="{{ space.id }}">
-                        <button type="submit" class="parking-space small-space
+                        <!-- Ejemplo para cada plaza in index.html -->
+                        <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
+                            <input type="hidden" name="space_id" value="{{ space.id }}">
+                            <button type="submit" class="parking-space small-space
                                 {% if space.estado %}occupied{% else %}free{% endif %}
                                 {% if space.id in [1,2,3,4,5,6,7,8,9,10] %}voluntariado{% endif %}
                                 {% if space.id in [11,12,13,14,15,24,25,26,27,28,29,30,31,32,33] %}lila{% endif %}
@@ -64,29 +60,27 @@
                                 {% if space.id in [42,43,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71] %}cruz-roja{% endif %}
                                 {% if space.id in [34,35,36,37] %}compartido{% endif %}
                                 {% if space.id in [45] %}moto{% endif %}">
-                            {% if space.estado %}
-                            <img src="{{ url_for('static', filename='car.png') }}" alt="Coche"
-                                style="width:30px; height:30px; display:block; margin:0 auto 4px;">
-                            {% endif %}
-                            <div class="plaza-numero">{{ space.tipo }}</div>
-                        </button>
-                    </form>
+                                {% if space.estado %}
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
+                                {% endif %}
+                                <div class="plaza-numero">{{ number_mapping[space.id] }}</div>
+                            </button>
+                        </form>
                     {% endfor %}
                 </div>
                 {% endfor %}
             </div>
             <div class="label escaleras">
-                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras"
-                    style="width: 40px; height: 40px;">
+                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras" style="width: 40px; height: 40px;">
             </div>
             <div class="block block-center">
                 {% for row in [layout.bloque_der[0:11], layout.bloque_der[11:23]] %}
                 <div class="parking-row">
                     {% for space in row %}
-                    <!-- Ejemplo para cada plaza in index.html -->
-                    <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
-                        <input type="hidden" name="space_id" value="{{ space.id }}">
-                        <button type="submit" class="parking-space small-space
+                        <!-- Ejemplo para cada plaza in index.html -->
+                        <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
+                            <input type="hidden" name="space_id" value="{{ space.id }}">
+                            <button type="submit" class="parking-space small-space
                                 {% if space.estado %}occupied{% else %}free{% endif %}
                                 {% if space.id in [1,2,3,4,5,6,7,8,9,10] %}voluntariado{% endif %}
                                 {% if space.id in [11,12,13,14,15,24,25,26,27,28,29,30,31,32,33] %}lila{% endif %}
@@ -97,56 +91,51 @@
                                 {% if space.id in [42,43,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71] %}cruz-roja{% endif %}
                                 {% if space.id in [34,35,36,37] %}compartido{% endif %}
                                 {% if space.id in [45] %}moto{% endif %}">
-                            {% if space.estado %}
-                            <img src="{{ url_for('static', filename='car.png') }}" alt="Coche"
-                                style="width:30px; height:30px; display:block; margin:0 auto 4px;">
-                            {% endif %}
-                            <div class="plaza-numero">{{ space.tipo }}</div>
-                        </button>
-                    </form>
+                                {% if space.estado %}
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
+                                {% endif %}
+                                <div class="plaza-numero">{{ number_mapping[space.id] }}</div>
+                            </button>
+                        </form>
                     {% endfor %}
                 </div>
                 {% endfor %}
             </div>
             <div class="label escaleras">
-                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras"
-                    style="width: 40px; height: 40px;">
+                <img src="{{ url_for('static', filename='escaleras.png') }}" alt="Escaleras" style="width: 40px; height: 40px;">
             </div>
         </div>
 
         <!-- Tercera fila: Plazas inferiores (exteriores) -->
         <div class="parking-row">
             <!-- Motos a la izquierda (IDs 45-49) en columna vertical al principio -->
-            <div class="motos-col"
-                style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 16px;">
+            <div class="motos-col" style="display: flex; flex-direction: column; align-items: flex-end; margin-right: 16px;">
                 {% for moto in [45,46,47,48,49] %}
-                <form method="post" action="/toggle/{{ moto }}" onsubmit="registrarClick({{ moto }})">
-                    <button type="submit"
-                        class="moto-space-vertical-small {% if layout.inferior[moto-45].estado %}occupied{% else %}free{% endif %}"
-                        data-moto-id="{{ moto }}">
-                        <div style="display: flex; flex-direction: row; align-items: center;">
-                            {% if layout.inferior[moto-45].estado %}
-                            <img src="{{ url_for('static', filename='bike-occupied.png') }}" alt="Moto Ocupada"
-                                style="width:20px; height:13px; margin-right: 3px; transform: scaleX(-1);">
-                            {% else %}
-                            <img src="{{ url_for('static', filename='bike.png') }}" alt="Moto"
-                                style="width:20px; height:13px; margin-right: 3px; transform: scaleX(-1);">
-                            {% endif %}
-                            <span style="font-size:0.9em;">{{ layout.inferior[moto-45].tipo }}</span>
-                        </div>
-                    </button>
-                </form>
+                    <form method="post" action="/toggle/{{ moto }}" onsubmit="registrarClick({{ moto }})">
+                        <button type="submit"
+                            class="moto-space-vertical-small {% if layout.inferior[moto-45].estado %}occupied{% else %}free{% endif %}"
+                            data-moto-id="{{ moto }}">
+                            <div style="display: flex; flex-direction: row; align-items: center;">
+                                {% if layout.inferior[moto-45].estado %}
+                                    <img src="{{ url_for('static', filename='bike-occupied.png') }}" alt="Moto Ocupada" style="width:20px; height:13px; margin-right: 3px; transform: scaleX(-1);">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='bike.png') }}" alt="Moto" style="width:20px; height:13px; margin-right: 3px; transform: scaleX(-1);">
+                                {% endif %}
+                                <span style="font-size:0.9em;">{{ number_mapping[layout.inferior[moto-45].id] }}</span>
+                            </div>
+                        </button>
+                    </form>
                 {% endfor %}
             </div>
 
             <!-- Plazas de coche normales -->
             <div style="flex: 1; display: flex; flex-direction: row; justify-content: center;">
                 {% for space in layout.inferior %}
-                {% if space.id not in [45,46,47,48,49,72,73,74,75,76,77] %}
-                <!-- Ejemplo para cada plaza in index.html -->
-                <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
-                    <input type="hidden" name="space_id" value="{{ space.id }}">
-                    <button type="submit" class="parking-space small-space
+                    {% if space.id not in [45,46,47,48,49,72,73,74,75,76,77] %}
+                        <!-- Ejemplo para cada plaza in index.html -->
+                        <form method="post" action="/mapa" onsubmit="registrarClick({{ space.id }})">
+                            <input type="hidden" name="space_id" value="{{ space.id }}">
+                            <button type="submit" class="parking-space small-space
                                 {% if space.estado %}occupied{% else %}free{% endif %}
                                 {% if space.id in [1,2,3,4,5,6,7,8,9,10] %}voluntariado{% endif %}
                                 {% if space.id in [11,12,13,14,15,24,25,26,27,28,29,30,31,32,33] %}lila{% endif %}
@@ -157,92 +146,46 @@
                                 {% if space.id in [42,43,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71] %}cruz-roja{% endif %}
                                 {% if space.id in [34,35,36,37] %}compartido{% endif %}
                                 {% if space.id in [45] %}moto{% endif %}">
-                        {% if space.estado %}
-                        <img src="{{ url_for('static', filename='car.png') }}" alt="Coche"
-                            style="width:30px; height:30px; display:block; margin:0 auto 4px;">
-                        {% elif space.id in [16, 46, 50] %}
-                        <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado"
-                            style="width:18px; height:18px; display:block; margin:0 auto 2px;">
-                        {% elif space.id in [22, 23] %}
-                        <img src="/static/embarazada.png" alt="Embarazada" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
-                        {% endif %}
-                        <div class="plaza-numero">{{ space.tipo }}</div>
-                    </button>
-                </form>
-                {% endif %}
+                                {% if space.estado %}
+                                    <img src="{{ url_for('static', filename='car.png') }}" alt="Coche" style="width:30px; height:30px; display:block; margin:0 auto 4px;">
+                                {% elif space.id in [16, 46, 50] %}
+                                    <img src="{{ url_for('static', filename='icon-disabled.png') }}" alt="Discapacitado" style="width:18px; height:18px; display:block; margin:0 auto 2px;">
+                                {% elif space.id in [22, 23] %}
+                                    <img src="{{ url_for('static', filename='embarazada.png') }}" alt="Embarazada" style="width:22px; height:22px; display:block; margin:0 auto 4px;">
+                                {% endif %}
+                                <div class="plaza-numero">{{ number_mapping[space.id] }}</div>
+                            </button>
+                        </form>
+                    {% endif %}
                 {% endfor %}
             </div>
 
             <!-- Motos a la derecha (IDs 72-77) en columna vertical al final -->
-            <div class="motos-col"
-                style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 16px;">
+            <div class="motos-col" style="display: flex; flex-direction: column; align-items: flex-start; margin-left: 16px;">
                 {% for moto in [72,73,74,75,76,77] %}
-                <form method="post" action="/toggle/{{ moto }}" onsubmit="registrarClick({{ moto }})">
-                    <button type="submit"
-                        class="moto-space-vertical-small {% if layout.inferior[moto-45].estado %}occupied{% else %}free{% endif %}">
-                        <div style="display: flex; flex-direction: row; align-items: center;">
-                            <span style="font-size:0.9em;">{{ layout.inferior[moto-45].tipo }}</span>
-                            {% if layout.inferior[moto-45].estado %}
-                            <img src="{{ url_for('static', filename='bike-occupied.png') }}" alt="Moto Ocupada"
-                                style="width:20px; height:13px; margin-left: 3px;">
-                            {% else %}
-                            <img src="{{ url_for('static', filename='bike.png') }}" alt="Moto"
-                                style="width:20px; height:13px; margin-left: 3px;">
-                            {% endif %}
-                        </div>
-                    </button>
-                </form>
+                    <form method="post" action="/toggle/{{ moto }}" onsubmit="registrarClick({{ moto }})">
+                        <button type="submit"
+                            class="moto-space-vertical-small {% if layout.inferior[moto-45].estado %}occupied{% else %}free{% endif %}">
+                            <div style="display: flex; flex-direction: row; align-items: center;">
+                                <span style="font-size:0.9em;">{{ number_mapping[layout.inferior[moto-45].id] }}</span>
+                                {% if layout.inferior[moto-45].estado %}
+                                    <img src="{{ url_for('static', filename='bike-occupied.png') }}" alt="Moto Ocupada" style="width:20px; height:13px; margin-left: 3px;">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='bike.png') }}" alt="Moto" style="width:20px; height:13px; margin-left: 3px;">
+                                {% endif %}
+                            </div>
+                        </button>
+                    </form>
                 {% endfor %}
             </div>
         </div>
-<<<<<<< HEAD
-    <div class="leyenda">
-        <!-- Columna de colores -->
-        <div class="leyenda-colores">
-            <div class="leyenda-item">
-                <div class="box" style="background-color: #ffe082;"></div>
-                <span>Plaza asignada matrícula</span>
-            </div>
-            <div class="leyenda-item">
-                <div class="box" style="background-color: #ff8a80;"></div>
-                <span>Vehículos de Cruz Roja</span>
-            </div>
-            <div class="leyenda-item">
-                <div class="box" style="background-color: #98ffe5;"></div>
-                <span>Vehículos compartidos</span>
-            </div>
-            <div class="leyenda-item">
-                <div class="box" style="background-color: #ce93d8;"></div>
-                <span>Movilidad personal</span>
-            </div>
-=======
         <div class="leyenda-grid">
             <!-- Fila 1 -->
->>>>>>> 921a981 (Mejoras en la interfaz visual del parking)
             <div class="leyenda-item">
                 <div class="box" style="background-color: #ffb74d;"></div>
                 <span>Voluntariado</span>
             </div>
             <div class="leyenda-item">
-                <div class="box" style="background-color: #ffe0b2;"></div>
-                <span>Movilidad otros centros</span>
-            </div>
-        </div>
-
-        <!-- Columna de iconos -->
-        <div class="leyenda-iconos">
-            <div class="leyenda-item">
-                <div class="box">
-                    <img src="{{ url_for('static', filename='embarazada.png') }}" alt="Embarazada">
-                </div>
-                <span>Mujer embarazada</span>
-            </div>
-            <div class="leyenda-item">
-                <div class="box">
-                    <img src="{{ url_for('static', filename='bike.png') }}" alt="Motocicletas">
-                </div>
-                <span>Motocicletas autorizadas</span>
-
                 <div class="box" style="background-color: #ffe082;"></div>
                 <span>Plaza asignada matrícula</span>
             </div>
@@ -261,7 +204,6 @@
             <div class="leyenda-item">
                 <div class="box" style="background-color: #ff8a80;"></div>
                 <span>Vehículos de Cruz Roja</span>
->>>>>>> 921a981 (Mejoras en la interfaz visual del parking)
             </div>
             <div class="leyenda-item">
                 <div class="box">
@@ -269,11 +211,6 @@
                 </div>
                 <span>Movilidad reducida</span>
             </div>
-<<<<<<< HEAD
-        </div>
-
-</div>
-=======
 
             <!-- Fila 3 -->
             <div class="leyenda-item">
@@ -291,18 +228,16 @@
                 <span>Motocicletas autorizadas</span>
             </div>
         </div>
-        <button class="btn-back-home" onclick="window.location.href='{{ url_for('routes.home') }}'">Volver al
-            Portal</button>
+        <button class="btn-back-home"  onclick="window.location.href='{{ url_for('routes.home') }}'">Volver al Portal</button>
 
     </div>
->>>>>>> 921a981 (Mejoras en la interfaz visual del parking)
 </body>
 <script>
     function registrarClick(plazaId) {
-        fetch(`/registrar_click/${plazaId}`, { method: 'POST' });
+        fetch(`/registrar_click/${plazaId}`, {method: 'POST'});
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         const parkingSpaces = document.querySelectorAll('.parking-space');
         parkingSpaces.forEach(space => {
             const content = space.childNodes[space.childNodes.length - 1];
@@ -320,8 +255,10 @@
         });
     });
 </script>
-
 </html>
+
+
+
 <!--
 1: 'B67', 2: 'B66', 3: 'B65', 4: 'B64', 5: 'B63', 6: 'B62', 7: 'B61', 8: 'B60', 9: 'B59', 10: 'B58',
 11: 'B41', 12: 'B42', 13: 'B43', 14: 'B44', 15: 'B45', 16: 'B46', 17: 'A39', 18: 'A38', 19: 'A37', 20: 'A36',

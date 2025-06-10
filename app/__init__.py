@@ -16,23 +16,12 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = Config.SQLALCHEMY_TRACK_MODIFICATIONS
     db.init_app(app)
 
-<<<<<<< HEAD
-    from .views_shared_vehicle import views_shared_vehicle_bp
-    from .views_volunteer import views_volunteer_bp
-    from .routes import routes
-
-    # Registro de Blueprints
-    app.register_blueprint(routes)
-    app.register_blueprint(views_shared_vehicle_bp)
-    app.register_blueprint(views_volunteer_bp)
-=======
     from .routes import routes
     from .views import views_bp  
 
     # Registro de Blueprints
     app.register_blueprint(routes, url_prefix='')
     app.register_blueprint(views_bp, url_prefix='')
->>>>>>> 921a981 (Mejoras en la interfaz visual del parking)
 
     return app
 

@@ -1,6 +1,4 @@
 from app import create_app
-from app.views_volunteer import views_volunteer_bp
-from app.views_shared_vehicle import views_shared_vehicle_bp
 from app import create_app, db
 from flask_migrate import Migrate
 
@@ -19,9 +17,3 @@ if __name__ == '__main__':
     print("   - Acceso a formulario para acceso con vehículos compartidos: http://127.0.0.1:5000/parking_access_shared_vehicle")
     print("   - Consultas: http://localhost:5000/conteo_multiple\n")
     app.run(debug=True)
-
-
-# Al ejecutar run.py, habres index.py:  http://127.0.0.1:5000/mapa
-# Para abrir parking_access_shared_vehicle: http://127.0.0.1:5000/parking_access_shared_vehicle
-# Para abrir parking_access_volunteer: http://127.0.0.1:5000/parking_access_volunteer
-
