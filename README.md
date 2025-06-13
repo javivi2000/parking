@@ -13,16 +13,13 @@ parking-management-app
 │   ├── routes.py                                # Rutas para visualizar y gestionar plazas.
 │   ├── views.py                                 # Rutas para formularios de vehículos compartidos y voluntarios.
 │   └── static/
-<<<<<<< HEAD
 │   |   └── landing.css                          # Estilos para la página principal.
 │   |   └── parking_shared_vehicle.css           # Estilos para el formulario de vehículo compartido.
 │   |   └── parking_volunteer.css                # Estilos para el formulario de voluntarios.
 │   |   └── styles.css                           # Estilos para del mapa de plazas.
-=======
 │   │   ├── landing.css                          # Estilos para la página de inicio.
 │   │   ├── parking_forms.css                    # Estilos para formularios.
 │   │   └── styles.css                           # Estilos del mapa de plazas.
->>>>>>> 921a981 (Mejoras en la interfaz visual del parking)
 │   └── templates/
 │       ├── conteo_multiple.html                 # Panel de estadísticas con resumen y gráfico de ocupación.
 │       ├── index.html                           # Mapa interactivo de plazas.
@@ -67,9 +64,9 @@ parking-management-app
 2. **Configura la base de datos**: Asegúrate de tener un servidor MySQL corriendo y crea una base de datos llamada `parking`.
 3. **Actualiza la configuración**: Modifica el archivo `app/config.py` con tus credenciales de MySQL.
 4. **Ejecuta la aplicación**:
-```bash
-python run.py
-```
+   ```bash
+   python run.py
+   ```
 
 Abre tu navegador en `http://127.0.0.1:5000`
 
@@ -87,11 +84,6 @@ Abre tu navegador en `http://127.0.0.1:5000`
 - **Gráficos y Estadísticas**: [http://127.0.0.1:5000/conteo_multiple](http://127.0.0.1:5000/conteo_multiple)  
   Visualiza estadísticas de ocupación y solicitudes en diferentes periodos.
 
-- **Cambiar Estado de Plaza**: [http://127.0.0.1:5000/toggle_estado](http://127.0.0.1:5000/toggle_estado)  
-  Cambia el estado de una plaza específica mediante su ID.
-
-- **Registrar Click en Plaza**: [http://127.0.0.1:5000/registrar_click](http://127.0.0.1:5000/registrar_click)  
-  Registra un clic en una plaza para seguimiento de uso.
 
 ## Características Técnicas Adicionales
 

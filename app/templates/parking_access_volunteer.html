@@ -93,15 +93,7 @@
         document.getElementById('formulario-voluntario').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // Recoge datos si necesitas (opcional)
-            // const nombre = document.getElementById('nombre').value;
-            // ... demás variables, aunque no es obligatorio si envías FormData(this)
-
-<<<<<<< HEAD
-            fetch('{{ url_for("views_volunteer.guardar") }}', {
-=======
             fetch('{{ url_for("views.volunteer_guardar") }}', {
->>>>>>> 921a981 (Mejoras en la interfaz visual del parking)
                 method: 'POST',
                 body: new FormData(this)
             })
