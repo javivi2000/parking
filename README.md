@@ -217,6 +217,49 @@ El modelo de datos se ha simplificado para centrarse únicamente en la gestión 
 +------------------------+
 ```
 
+### Script del la Base de datos de SQLAlchemy:
+```
+CREATE TABLE `tipo_plaza` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `descripcion` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `registro_click_plaza` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `plaza_id` int(11) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `plaza_id` (`plaza_id`),
+  CONSTRAINT `registro_click_plaza_ibfk_1` FOREIGN KEY (`plaza_id`) REFERENCES `plaza` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3639 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `plaza` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `estado` tinyint(1) NOT NULL DEFAULT '0',
+  `tipo` varchar(255) DEFAULT NULL,
+  `ultima_ocupacion` datetime DEFAULT NULL,
+  `tipo_plaza_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_plaza_tipo_plaza` (`tipo_plaza_id`),
+  CONSTRAINT `fk_plaza_tipo_plaza` FOREIGN KEY (`tipo_plaza_id`) REFERENCES `tipo_plaza` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `historial_ocupacion` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tipo_plaza_id` int(11) NOT NULL,
+  `plaza_id` int(11) NOT NULL,
+  `fecha` date NOT NULL,
+  `hora_inicio` datetime NOT NULL,
+  `hora_fin` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `tipo_plaza_id` (`tipo_plaza_id`),
+  KEY `fk_historial_ocupacion_plaza` (`plaza_id`),
+  CONSTRAINT `fk_historial_ocupacion_plaza` FOREIGN KEY (`plaza_id`) REFERENCES `plaza` (`id`),
+  CONSTRAINT `historial_ocupacion_ibfk_1` FOREIGN KEY (`tipo_plaza_id`) REFERENCES `tipo_plaza` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=658 DEFAULT CHARSET=utf8;
+```
+
 **Descripción de tablas:**
 
 - **tipo_plaza**: Tipos de plaza (voluntariado, movilidad, etc).
