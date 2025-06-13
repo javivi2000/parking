@@ -1,99 +1,170 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Estadísticas de Plazas</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-gradient-to-tr from-blue-50 to-indigo-100 min-h-screen p-6">
   <div class="max-w-3xl mx-auto">
     <!-- Encabezado principal -->
     <header class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
       <h1 class="text-4xl font-extrabold text-indigo-800">Gestión de Plazas 🚗</h1>
     </header>
-    <!-- Filtros -->
-    <form method="GET" action="{{ url_for('routes.conteo_multiple') }}" class="mb-6 bg-white p-4 rounded-lg shadow-md flex flex-col md:flex-row gap-4 items-center">
-      <div class="flex flex-col">
-        <label for="tipo_plaza" class="block text-sm font-medium text-gray-700">Tipo de Plaza:</label>
-        <select name="tipo_plaza" id="tipo_plaza" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" onchange="this.form.submit()">
-          <option value="">Todos</option>
-          {% for tipo in datos_plazas.keys() %}
-          <option value="{{ tipo }}" {% if request.args.get('tipo_plaza') == tipo %}selected{% endif %}>{{ tipo }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </form>
+
+    <!-- Filtro de tipo de plaza con fondo y borde -->
+    <div class="mb-8 bg-white rounded-3xl shadow-xl p-6 flex items-center gap-3 border border-gray-200 max-w-3xl mx-auto">
+      <label for="filtro-tipo" class="font-semibold text-gray-700">Filtrar por tipo de plaza:</label>
+      <select id="filtro-tipo" class="border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+        <option value="todos">Todos</option>
+        {% for tipo in tipos_plaza %}
+          <option value="{{ tipo }}">{{ tipo }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
     <!-- Tabla combinada -->
     <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-resumen">
       <h2 id="titulo-resumen" class="text-xl font-semibold text-gray-800 mb-6">Resumen por tipo de plaza</h2>
-      <table class="w-full text-sm text-left mx-auto max-w-3xl border-separate border-spacing-y-1" role="table" aria-describedby="desc-resumen">
+      <table
+        class="w-full text-sm text-left mx-auto max-w-3xl border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+        role="table" aria-describedby="desc-resumen">
         <caption id="desc-resumen" class="sr-only">
           Tabla que muestra el total, ocupadas, disponibles, solicitadas y ratio de ocupación por tipo de plaza
         </caption>
-        <thead class="text-xs text-gray-600 uppercase bg-gray-100 rounded-lg">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-100">
           <tr>
-            <th scope="col" class="px-4 py-3">Tipo de Plaza</th>
-            <th scope="col" class="px-4 py-3 text-center">Total Plazas</th>
-            <th scope="col" class="px-4 py-3 text-center">Plazas Ocupadas</th>
-            <th scope="col" class="px-4 py-3 text-center">Disponibles</th>
-            <th scope="col" class="px-4 py-3 text-center">Solicitadas</th>
-            <th scope="col" class="px-4 py-3 text-center">Porcentaje de Ocupación</th>
+            <th scope="col" class="px-4 py-3 border-b border-gray-200">Tipo de Plaza</th>
+            <th scope="col" class="px-4 py-3 border-b border-gray-200 text-center">Total de plazas</th>
+            <th scope="col" class="px-4 py-3 border-b border-gray-200 text-center text-red-600">Plazas ocupadas</th>
+            <th scope="col" class="px-4 py-3 border-b border-gray-200 text-center text-green-600">Plazas disponibles
+            </th>
+            <th scope="col" class="px-4 py-3 border-b border-gray-200 text-center text-blue-600">Plazas solicitadas</th>
+            <th scope="col" class="px-4 py-3 border-b border-gray-200 text-center">Porcentaje de ocupación</th>
           </tr>
         </thead>
         <tbody>
-          {% if datos_plazas %}
-            {% for tipo, datos in datos_plazas.items() %}
-              <tr class="hover:bg-indigo-50 transition-colors">
-                <th scope="row" class="px-4 py-3 font-medium text-gray-700">{{ tipo }}</th>
-                <td class="px-4 py-3 text-center">{{ datos.total }}</td>
-                <td class="px-4 py-3 text-center text-red-600 font-semibold">{{ datos.ocupadas }}</td>
-                <td class="px-4 py-3 text-center text-green-600 font-semibold">{{ datos.disponibles }}</td>
-                <td class="px-4 py-3 text-center text-blue-600 font-semibold">
-                  {{ datos_disponibilidad[tipo].solicitadas if tipo in datos_disponibilidad else 0 }}
-                </td>
-                <td class="px-4 py-3 text-center font-semibold">
-                  {{ datos_disponibilidad[tipo].ratio_ocupacion if tipo in datos_disponibilidad else 0 }}%
-                </td>
-              </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="6" class="text-center text-gray-500 py-4">No hay datos disponibles para mostrar.</td>
-            </tr>
-          {% endif %}
-        </tbody>
-        <tfoot class="bg-gray-100">
-          <tr>
-            <th scope="row" class="px-4 py-3 font-medium text-gray-700">Total</th>
-            <td class="px-4 py-3 text-center">{{ total_conjunto.total }}</td>
-            <td class="px-4 py-3 text-center text-red-600 font-semibold">{{ total_conjunto.ocupadas }}</td>
-            <td class="px-4 py-3 text-center text-green-600 font-semibold">{{ total_conjunto.disponibles }}</td>
-            <td class="px-4 py-3 text-center text-blue-600 font-semibold">{{ total_solicitadas }}</td>
-            <td class="px-4 py-3 text-center font-semibold">
-              {{ total_ratio_ocupacion }}%
+          {% for tipo in tipos_plaza %}
+          <tr class="hover:bg-indigo-50 transition-colors border-b border-gray-100">
+            <td class="px-4 py-3 font-medium text-gray-700 border-b border-gray-100">
+              {{ tipo }}
             </td>
+            <td class="px-4 py-3 text-center border-b border-gray-100">{{ limites_plazas[tipo] }}</td>
+            <td class="px-4 py-3 text-center border-b border-gray-100 text-red-600 font-semibold">{{
+              ocupadas_por_tipo[tipo] }}</td>
+            <td class="px-4 py-3 text-center border-b border-gray-100 text-green-600 font-semibold">{{
+              disponibles_por_tipo[tipo] }}</td>
+            <td class="px-4 py-3 text-center border-b border-gray-100 text-blue-600 font-semibold">{{
+              solicitadas_por_tipo[tipo] }}</td>
+            <td class="px-4 py-3 text-center border-b border-gray-100">{{ porcentaje_ocupacion[tipo] }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr class="bg-gray-50 font-bold border-t border-gray-300">
+            <td class="px-4 py-3 text-right">Total</td>
+            <td class="px-4 py-3 text-center">{{ total_plazas }}</td>
+            <td class="px-4 py-3 text-center text-red-600 font-semibold">{{ total_ocupadas }}</td>
+            <td class="px-4 py-3 text-center text-green-600 font-semibold">{{ total_disponibles }}</td>
+            <td class="px-4 py-3 text-center text-blue-600 font-semibold">{{ total_solicitadas }}</td>
+            <td class="px-4 py-3 text-center">{{ total_porcentaje_ocupacion }}%</td>
           </tr>
         </tfoot>
       </table>
-      <p class="text-sm text-gray-500 mt-4">
-        <strong>Nota:</strong> El <em>Porcentaje de Ocupación</em> indica la proporción de plazas ocupadas respecto al total disponible para cada tipo de plaza.
+      <!-- Nota sobre el porcentaje de ocupación -->
+      <p class="text-xs text-gray-400 mt-2 mb-8">
+        * El porcentaje de ocupación se calcula como: (Ocupadas / Total de plazas) × 100.
+      </p>
+    </section>
+    <section class="bg-white rounded-3xl shadow-xl p-6 mb-10">
+      <h2 class="text-xl font-semibold text-gray-800 mb-6">Gráfica de plazas ocupadas y disponibles</h2>
+      <canvas id="graficoPlazas" height="120"></canvas>
+    </section>
+    <!-- Sección de demanda por tipo de plaza -->
+    <section class="bg-white rounded-3xl shadow-xl p-6 mb-10">
+      <h3 class="text-xl font-bold text-indigo-800 mb-4">Demanda por tipo de plaza</h3>
+      <!-- Leyenda de colores -->
+      <div class="mb-4 flex gap-4 text-xs">
+        <span class="inline-flex items-center"><span
+            class="w-3 h-3 bg-red-100 rounded-full mr-1 border border-red-300"></span>Alta demanda</span>
+        <span class="inline-flex items-center"><span
+            class="w-3 h-3 bg-yellow-100 rounded-full mr-1 border border-yellow-300"></span>Demanda media</span>
+        <span class="inline-flex items-center"><span
+            class="w-3 h-3 bg-green-100 rounded-full mr-1 border border-green-300"></span>Demanda baja</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table
+          class="w-full text-sm text-left mx-auto max-w-3xl border border-gray-200 rounded-lg overflow-hidden shadow-sm"
+          role="table" aria-describedby="desc-demanda">
+          <caption id="desc-demanda" class="sr-only">
+            Tabla que muestra el número de solicitudes y el nivel de demanda por tipo de plaza
+          </caption>
+          <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+            <tr>
+              <th class="px-4 py-3 border-b border-gray-200">Tipo de plaza</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-center">Solicitudes</th>
+              <th class="px-4 py-3 border-b border-gray-200 text-center">Nivel</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tipo in tipos_plaza %}
+            <tr class="hover:bg-indigo-50 transition-colors border-b border-gray-100">
+              <td class="px-4 py-3 font-medium text-gray-700 border-b border-gray-100">{{ tipo }}</td>
+              <td class="px-4 py-3 text-center border-b border-gray-100 text-blue-600 font-semibold">
+                {{ total_solicitudes_por_tipo[tipo] }}
+              </td>
+              <td class="px-4 py-3 text-center border-b border-gray-100">
+                {% if porcentaje_demanda[tipo] >= 80 %}
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-red-100 text-red-700">
+                  <svg class="w-4 h-4 mr-1 text-red-600 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
+                  </svg>
+                  Alta demanda
+                </span>
+                {% elif porcentaje_demanda[tipo] >= 50 %}
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-yellow-100 text-yellow-700">
+                  Demanda media
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700">
+                  Demanda baja
+                </span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-gray-400 mt-4">
+        * La demanda se calcula como: (Solicitudes / Plazas disponibles) × 100.<br>
+        Si la demanda es alta, puede haber lista de espera o dificultad para conseguir plaza.
       </p>
     </section>
     <!-- Alertas de Alta Demanda -->
-    {% if alertas %}
+    {% if alertas and alertas|length > 0 %}
     <section class="bg-red-50 border border-red-200 rounded-3xl shadow-xl p-6 mb-10">
       <div class="flex items-center mb-6">
-        <svg class="w-8 h-8 text-red-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
+        <svg class="w-8 h-8 text-red-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
         </svg>
         <h3 class="text-2xl font-bold text-red-600">Alertas de Alta Demanda</h3>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         {% for alerta in alertas %}
-        <div class="flex items-center bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-red-100 transition">
-          <svg class="w-6 h-6 text-red-500 flex-shrink-0 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
+        <div
+          class="flex items-center bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:bg-red-100 transition">
+          <svg class="w-6 h-6 text-red-500 flex-shrink-0 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M12 17a5 5 0 100-10 5 5 0 000 10zm0 0v.01M12 17h.01" />
           </svg>
           <p class="text-gray-700">{{ alerta }}</p>
         </div>
@@ -101,134 +172,89 @@
       </div>
     </section>
     {% endif %}
-    <!-- Gráfico de ocupación histórica -->
-    <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-grafico">
-      <div class="flex justify-between items-center mb-6">
-        <h2 id="titulo-grafico" class="text-xl font-semibold text-gray-800">Ocupación y Solicitudes por Mes</h2>
-      </div>
-      <div id="graficos-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {% if datos_graficos %}
-          <!-- Los gráficos individuales se generarán aquí -->
-        {% else %}
-          <p class="text-center text-gray-500">No hay datos disponibles para los gráficos.</p>
-        {% endif %}
-      </div>
-    </section>
-    <!-- Gráfico comparativo -->
-    <section class="bg-white rounded-3xl shadow-xl p-6 mb-10" aria-labelledby="titulo-comparativo">
-      <h2 id="titulo-comparativo" class="text-xl font-semibold text-gray-800 mb-6 text-center">Comparativa de Ocupación y Disponibilidad</h2>
-      <div class="w-full flex justify-center overflow-x-auto">
-        <canvas id="graficoComparativo" class="w-full max-w-4xl min-w-[400px] min-h-[350px] max-h-[600px]" style="aspect-ratio: 2/1;"></canvas>
-      </div>
-    </section>
-
+    <script src="{{ url_for('static', filename='js/conteo_multiple.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-      // Gráficos individuales (históricos) - estos usan los datos filtrados
-      const datosGraficos = {{ datos_graficos_json | safe }};
-      const container = document.getElementById('graficos-container');
-      container.innerHTML = '';
-
-      Object.keys(datosGraficos).forEach((tipo, index) => {
-        const datosTipo = datosGraficos[tipo];
-        if (!datosTipo || !Array.isArray(datosTipo.fechas) || !Array.isArray(datosTipo.ocupaciones)) {
-          return;
-        }
-
-        const chartContainer = document.createElement('div');
-        chartContainer.classList.add('bg-white', 'p-6', 'rounded-lg', 'shadow-md', 'w-full', 'mb-8');
-
-        const chartTitle = document.createElement('h3');
-        chartTitle.textContent = tipo;
-        chartTitle.classList.add('text-xl', 'font-semibold', 'text-gray-800', 'mb-4', 'text-center');
-        chartContainer.appendChild(chartTitle);
-
-        const canvas = document.createElement('canvas');
-        canvas.id = `chart-${index}`;
-        canvas.style.height = '250px';
-        canvas.style.width = '100%';
-        chartContainer.appendChild(canvas);
-
-        container.appendChild(chartContainer);
-
-        const config = {
+      document.addEventListener('DOMContentLoaded', function () {
+        const tiposPlaza = {{ tipos_plaza|tojson }};
+        const ocupadasPorTipo = {{ ocupadas_por_tipo|tojson }};
+        const disponiblesPorTipo = {{ disponibles_por_tipo|tojson }};
+        const labels = tiposPlaza;
+        const dataOcupadas = labels.map(tipo => ocupadasPorTipo[tipo]);
+        const dataDisponibles = labels.map(tipo => disponiblesPorTipo[tipo]);
+        const ctx = document.getElementById('graficoPlazas').getContext('2d');
+        // Guardar instancia del gráfico para poder actualizarlo
+        let grafico = new Chart(ctx, {
           type: 'bar',
           data: {
-            labels: datosTipo.fechas,
+            labels: labels,
             datasets: [
               {
-                label: 'Ocupaciones',
-                data: datosTipo.ocupaciones,
-                backgroundColor: 'rgba(25, 118, 210, 0.3)',
-                borderColor: '#1976d2',
-                borderWidth: 1,
-                yAxisID: 'y',
+                label: 'Ocupadas',
+                data: dataOcupadas,
+                backgroundColor: 'rgba(220, 38, 38, 0.7)'
               },
               {
-                label: 'Solicitudes',
-                data: datosTipo.solicitudes || [],
-                backgroundColor: 'rgba(255, 99, 132, 0.3)',
-                borderColor: '#ff6384',
-                borderWidth: 1,
-                yAxisID: 'y1',
-              },
-            ],
+                label: 'Disponibles',
+                data: dataDisponibles,
+                backgroundColor: 'rgba(22, 163, 74, 0.7)'
+              }
+            ]
           },
           options: {
+            indexAxis: 'y',
             responsive: true,
             plugins: {
-              legend: {
-                position: 'bottom',
-              },
+              legend: { position: 'top' }
             },
             scales: {
-              x: { title: { display: true, text: 'Mes' } },
-              y: { title: { display: true, text: 'Ocupaciones' }, beginAtZero: true },
-              y1: { title: { display: true, text: 'Solicitudes' }, beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } },
-            },
-          },
-        };
-
-        new Chart(canvas.getContext('2d'), config);
-      });
-
-      // Gráfico comparativo (siempre global)
-      const datosPlazasTodos = {{ datos_plazas_todos | safe }};
-      const tiposComparativa = Object.keys(datosPlazasTodos);
-      const ocupados = tiposComparativa.map(tipo => {
-        const plaza = datosPlazasTodos[tipo];
-        return plaza.total > 0 ? Math.round((plaza.ocupadas / plaza.total) * 100) : 0;
-      });
-      const disponibles = tiposComparativa.map(tipo => {
-        const plaza = datosPlazasTodos[tipo];
-        return plaza.total > 0 ? Math.round((plaza.disponibles / plaza.total) * 100) : 0;
-      });
-
-      new Chart(document.getElementById('graficoComparativo').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: tiposComparativa,
-          datasets: [
-            { label: 'Ocupación (%)', data: ocupados, backgroundColor: 'rgba(220, 38, 38, 0.7)' },
-            { label: 'Disponibles (%)', data: disponibles, backgroundColor: 'rgba(22, 163, 74, 0.7)' }
-          ]
-        },
-        options: {
-          indexAxis: 'y',
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { position: 'top', labels: { font: { size: 18 } } }
-          },
-          scales: {
-            x: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%', font: { size: 16 } } },
-            y: { ticks: { font: { size: 18 }, color: '#222' } }
+              x: { beginAtZero: true, ticks: { color: '#222', font: { size: 14 } } },
+              y: { ticks: { color: '#222', font: { size: 14 } } }
+            }
           }
-        }
+        });
+
+        // Filtro de tipo de plaza para ambas tablas y el gráfico
+        const filtro = document.getElementById('filtro-tipo');
+        filtro.addEventListener('change', function () {
+          const valor = filtro.value;
+          // Filtrar primera tabla
+          document.querySelectorAll('section table')[0].querySelectorAll('tbody tr').forEach(tr => {
+            const tipo = tr.querySelector('td')?.textContent?.trim();
+            if (valor === 'todos' || tipo === valor) {
+              tr.style.display = '';
+            } else {
+              tr.style.display = 'none';
+            }
+          });
+          // Filtrar segunda tabla
+          document.querySelectorAll('section table')[1].querySelectorAll('tbody tr').forEach(tr => {
+            const tipo = tr.querySelector('td')?.textContent?.trim();
+            if (valor === 'todos' || tipo === valor) {
+              tr.style.display = '';
+            } else {
+              tr.style.display = 'none';
+            }
+          });
+          // Filtrar gráfico
+          let newLabels, newDataOcupadas, newDataDisponibles;
+          if (valor === 'todos') {
+            newLabels = labels;
+            newDataOcupadas = labels.map(tipo => ocupadasPorTipo[tipo]);
+            newDataDisponibles = labels.map(tipo => disponiblesPorTipo[tipo]);
+          } else {
+            newLabels = [valor];
+            newDataOcupadas = [ocupadasPorTipo[valor]];
+            newDataDisponibles = [disponiblesPorTipo[valor]];
+          }
+          grafico.data.labels = newLabels;
+          grafico.data.datasets[0].data = newDataOcupadas;
+          grafico.data.datasets[1].data = newDataDisponibles;
+          grafico.update();
+        });
       });
     </script>
   </div>
 </body>
+
 </html>
-
-

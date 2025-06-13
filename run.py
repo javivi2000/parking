@@ -13,7 +13,14 @@ migrate = Migrate(app, db)
 
 if __name__ == '__main__':
     print("   - Visualizar Plazas Disponibles: http://127.0.0.1:5000/mapa")
-    print("   - Acceso a formulario para voluntarios: http://127.0.0.1:5000/parking_access_volunteer")
-    print("   - Acceso a formulario para acceso con vehículos compartidos: http://127.0.0.1:5000/parking_access_shared_vehicle")
     print("   - Consultas: http://localhost:5000/conteo_multiple\n")
     app.run(debug=True)
+
+"""
+Archivo principal para ejecutar la aplicación Flask.
+
+- Crea la app con create_app().
+- Configura la conexión a la base de datos MySQL.
+- Inicializa Flask-Migrate para gestionar migraciones de la base de datos.
+- Al ejecutar, muestra URLs útiles y arranca el servidor en modo debug.
+"""

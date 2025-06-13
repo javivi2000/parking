@@ -11,32 +11,125 @@ parking-management-app
 │   ├── config.py                                # Configuración de la aplicación y base de datos.
 │   ├── models.py                                # Modelos de datos con SQLAlchemy.
 │   ├── routes.py                                # Rutas para visualizar y gestionar plazas.
-│   ├── views.py                                 # Rutas para formularios de vehículos compartidos y voluntarios.
-│   └── static/
-│   |   └── landing.css                          # Estilos para la página principal.
-│   |   └── parking_shared_vehicle.css           # Estilos para el formulario de vehículo compartido.
-│   |   └── parking_volunteer.css                # Estilos para el formulario de voluntarios.
-│   |   └── styles.css                           # Estilos para del mapa de plazas.
-│   │   ├── landing.css                          # Estilos para la página de inicio.
-│   │   ├── parking_forms.css                    # Estilos para formularios.
-│   │   └── styles.css                           # Estilos del mapa de plazas.
+│   ├── static/
+│   |   ├── landing.css                          # Estilos para la página de inicio.
+│   |   ├── parking_forms.css                    # Estilos para formularios.
+│   |   ├── styles.css                           # Estilos del mapa de plazas.
+│   |   └── js/
+│   |       ├── index.js                         # Lógica JS del mapa interactivo de plazas.
+│   |       └── conteo_multiple.js               # Lógica JS para gráficos y estadísticas.
+│   |
 │   └── templates/
 │       ├── conteo_multiple.html                 # Panel de estadísticas con resumen y gráfico de ocupación.
 │       ├── index.html                           # Mapa interactivo de plazas.
-│       ├── landing.html                         # Página de aterrizaje.
-│       ├── parking_access_shared_vehicle.html   # Formulario para vehículos compartidos.
-│       └── parking_access_volunteer.html        # Formulario para voluntarios.
+│       └──landing.html                          # Página de aterrizaje.
+|
+├── data/
+│   ├── excel_utils.py                           # Utilidades para cargar datos desde Excel.
+│   ├── Plazas Movilidad y Voluntariado.xlsx     # Datos de plazas de movilidad y voluntariado.
+│   └── Vehículos compartidos.xlsx               # Datos de vehículos compartidos.
 ├── requirements.txt                             # Dependencias del proyecto.
 ├── README.md                                    # Documentación del proyecto.
 └── run.py                                       # Punto de entrada de la aplicación.
 ```
-## Descripción de Archivos Clave
 
-- **`__init__.py`**: Inicializa la aplicación Flask, configura SQLAlchemy y registra Blueprints. Usa `pymysql` para conectar con MySQL.
-- **`config.py`**: Define la configuración principal de la app, incluyendo `SECRET_KEY` y la URI de la base de datos.
-- **`models.py`**: Contiene todos los modelos de base de datos: solicitantes, vehículos, solicitudes, plazas, acompañantes, etc. Usa relaciones y claves foráneas para mantener integridad.
-- **`routes.py`**: Define las rutas principales para visualizar y cambiar el estado de plazas (libre/ocupado). Incluye funciones para representar visualmente el mapa y actualizarlo en base a la BD.
-- **`views.py`**: Agrupa rutas para manejar formularios de vehículos compartidos y voluntariado. Valida, procesa y guarda datos ingresados por los usuarios.
+## Descripción de Archivos y Carpetas
+
+### Carpeta `app/`
+Contiene el núcleo de la aplicación Flask.
+
+- **`__init__.py`**  
+  Inicializa la aplicación Flask, configura la base de datos (SQLAlchemy), y registra los Blueprints (módulos de rutas).  
+  Si necesitas agregar nuevas rutas o módulos, aquí es donde se registran.
+
+- **`config.py`**  
+  Define la configuración global de la app, como la conexión a la base de datos, claves secretas, y otros parámetros de entorno.
+
+- **`models.py`**  
+  Define todos los modelos de la base de datos usando SQLAlchemy. Aquí se encuentran las clases que representan las tablas (usuarios, plazas, solicitudes, vehículos, etc).
+
+- **`routes.py`**  
+  Contiene las rutas principales de la aplicación, especialmente las relacionadas con el mapa de plazas y su gestión (libre/ocupado).
+
+
+#### Carpeta `static/`
+Archivos estáticos (CSS, JS, imágenes).
+
+- **`landing.css`**  
+  Estilos para la página de inicio.
+
+- **`parking_forms.css`**  
+  Estilos para los formularios de registro.
+
+- **`styles.css`**  
+  Estilos generales para el mapa de plazas y la interfaz principal.
+
+- **`js/index.js`**  
+  Lógica JavaScript para el mapa interactivo de plazas: manejo de clicks, matrículas, almacenamiento local, etc.
+
+- **`js/conteo_multiple.js`**  
+  Lógica JavaScript para la página de estadísticas y gráficos.
+
+#### Carpeta `templates/`
+Plantillas HTML renderizadas por Flask.
+
+- **`index.html`**  
+  Página principal con el mapa interactivo de plazas.
+
+- **`landing.html`**  
+  Página de bienvenida o inicio.
+
+- **`parking_access_shared_vehicle.html`**  
+  Formulario para registrar vehículos compartidos.
+
+- **`parking_access_volunteer.html`**  
+  Formulario para registrar voluntarios.
+
+- **`conteo_multiple.html`**  
+  Página de estadísticas y gráficos de ocupación.
+
+---
+
+### Carpeta `data/`
+Archivos y utilidades para cargar y manejar datos externos.
+
+- **`excel_utils.py`**  
+  Funciones para importar y procesar datos desde archivos Excel.
+
+- **`Plazas Movilidad y Voluntariado.xlsx`**  
+  Archivo Excel con datos de plazas para movilidad y voluntariado.
+
+- **`Vehículos compartidos.xlsx`**  
+  Archivo Excel con datos de vehículos compartidos.
+
+---
+
+### Otros Archivos
+
+- **`requirements.txt`**  
+  Lista de dependencias de Python necesarias para el proyecto.
+
+- **`README.md`**  
+  Documentación principal: descripción general, instalación, uso y modelo de datos.
+
+- **`run.py`**  
+  Script principal para arrancar la aplicación Flask.
+
+---
+
+## Notas extra
+
+- **Base de datos:**  
+  El proyecto usa MySQL y SQLAlchemy. Los modelos están en `models.py` y la configuración en `config.py`.
+
+- **Frontend:**  
+  El mapa de plazas es interactivo gracias a JavaScript (`index.js`) y usa Bootstrap 5 para estilos.
+
+- **Estadísticas:**  
+  La página `/conteo_multiple` muestra gráficos y tablas dinámicas usando JS y datos de la base de datos.
+
+- **Persistencia local:**  
+  Algunas funciones (como matrículas temporales) usan LocalStorage del navegador.
 
 ## Funcionalidades
 
@@ -53,6 +146,13 @@ parking-management-app
 - MySQL  
 - pymysql  
 - SQLAlchemy  
+- Flask-WTF  
+- WTForms  
+- Jinja2  
+- Werkzeug  
+- pandas  
+- Bootstrap 5 (CDN, solo frontend)  
+- Navegador moderno con soporte para LocalStorage y JavaScript
 
 ## Instrucciones de Instalación
 
@@ -75,11 +175,6 @@ Abre tu navegador en `http://127.0.0.1:5000`
 - **Mapa de Plazas**: [http://127.0.0.1:5000/mapa](http://127.0.0.1:5000/mapa)  
   Haz clic en una plaza para cambiar su estado (libre/ocupado).
 
-- **Formulario Vehículo Compartido**: [http://127.0.0.1:5000/parking_access_shared_vehicle](http://127.0.0.1:5000/parking_access_shared_vehicle)  
-  Completa los datos requeridos y guarda el registro.
-
-- **Formulario Voluntariado**: [http://127.0.0.1:5000/parking_access_volunteer](http://127.0.0.1:5000/parking_access_volunteer)  
-  Registra voluntarios y sus solicitudes con validaciones integradas.
 
 - **Gráficos y Estadísticas**: [http://127.0.0.1:5000/conteo_multiple](http://127.0.0.1:5000/conteo_multiple)  
   Visualiza estadísticas de ocupación y solicitudes en diferentes periodos.
@@ -94,77 +189,46 @@ Abre tu navegador en `http://127.0.0.1:5000`
 
 
 ## Modelo de la Base de Datos (parking)
+
+El modelo de datos se ha simplificado para centrarse únicamente en la gestión de plazas, su tipo y el registro de ocupaciones y clicks. Las tablas principales son:
+
 ```text
-                 +----------------+         +----------------+
-                 |    ambito      |         |   frecuencia   |
-                 +----------------+         +----------------+
-                 | id (PK)        |         | id (PK)        |
-                 | descripcion    |         | descripcion    |
-                 +----------------+         +----------------+
-
-                 +----------------+         +----------------+
-                 |  tipo_plaza    |         | franja_horaria |
-                 +----------------+         +----------------+
-                 | id (PK)        |         | id (PK)        |
-                 | descripcion    |         | descripcion    |
-                 +----------------+         +----------------+
-
-                           ▲                        ▲
-                           |                        |
-                           |                        |
-                           |                        |
-                 +--------------------------+       |
-                 |      solicitudes         |       |
-                 +--------------------------+       |
-                 | id (PK)                  |       |
-                 | correo                   |       |
-                 | ambito_id (FK) --------------+   |
-                 | frecuencia_id (FK) ------------+ |
-                 | tipo_plaza_id (FK) --------------+
-                 | mifare (si/no)           |
-                 | fecha_solicitud          |
-                 +--------------------------+
-                           ▲
-                           |
-        +------------------+------------------+
-        |                                     |
-  +-----------------------+        +--------------------------+
-  | solicitud_dias_franjas|        |       vehiculos          |
-  +-----------------------+        +--------------------------+
-  | id (PK)               |        | id (PK)                  |
-  | solicitud_id (FK) ----+        | solicitante_id (FK)      |
-  | dias_semana           |        | matricula                |
-  | franja_horaria_id (FK)|        +--------------------------+
-  +-----------------------+
-
-  +-------------------------+      +---------------------------+
-  |      periodos_uso       |      |       acompanantes        |
-  +-------------------------+      +---------------------------+
-  | id (PK)                 |      | id (PK)                   |
-  | solicitante_id (FK)     |      | solicitante_id (FK)       |
-  | periodo_inicio          |      | nombre                    |
-  | periodo_fin             |      | numero                    |
-  +-------------------------+      +---------------------------+
-
-  +--------------------------+     +---------------------------+
-  |    historial_ocupacion   |     |           plaza           |
-  +--------------------------+     +---------------------------+
-  | id (PK)                  |     | id (PK)                   |
-  | tipo_plaza_id (FK)       |     | estado (0/1)              |
-  | plaza_id                 |     | tipo                      |
-  | fecha                    |     | ultima_ocupacion          |
-  | hora_inicio              |     +---------------------------+
-  | hora_fin                 |
-  +--------------------------+
-
-  +--------------------------+
-  | registro_click_plaza     |
-  +--------------------------+
-  | id (PK)                  |
-  | plaza_id                 |
-  | timestamp                |
-  +--------------------------+
++-------------------+         +-------------------+
+|    tipo_plaza     |         |      plaza        |
++-------------------+         +-------------------+
+| id (PK)           |◄────────| tipo_plaza_id (FK)|
+| descripcion       |         | id (PK)           |
++-------------------+         | estado            |
+                              | tipo              |
+                              | ultima_ocupacion  |
+                              +-------------------+
+                                       ▲
+                                       │
+                                       │
++------------------------+     +--------------------------+
+| historial_ocupacion    |     | registro_click_plaza     |
++------------------------+     +--------------------------+
+| id (PK)                |     | id (PK)                  |
+| tipo_plaza_id (FK)     |     | plaza_id (FK)            |
+| plaza_id (FK)          |     | timestamp                |
+| fecha                  |     +--------------------------+
+| hora_inicio            |
+| hora_fin               |
++------------------------+
 ```
+
+**Descripción de tablas:**
+
+- **tipo_plaza**: Tipos de plaza (voluntariado, movilidad, etc).
+- **plaza**: Plazas de estacionamiento, su estado y tipo.
+- **historial_ocupacion**: Registro de ocupaciones y liberaciones de cada plaza.
+- **registro_click_plaza**: Registro de cada click/cambio de estado en una plaza.
+
+**Relaciones:**  
+- Cada plaza puede tener un tipo (`tipo_plaza_id`).
+- Cada registro de ocupación y click está vinculado a una plaza y, en el caso de ocupación, también a un tipo de plaza.
+
+---
 
 
 ## Plazas y su 	ID / Código
@@ -185,3 +249,12 @@ Abre tu navegador en `http://127.0.0.1:5000`
 ## Licencia
 
 Este proyecto está licenciado bajo la **Licencia MIT**.
+
+
+## Pendientes y errores identificados
+
+- **Estadísticas (`conteo_multiple.html` / `conteo_multiple.js`)**  
+  Las tablas *Plazas solicitadas* y *Solicitudes* no muestran correctamente los totales de solicitudes con estado **"Aprobado"** y **"Tarjeta actualizada"**. Falta integrar y filtrar adecuadamente los datos desde los Excel de SharePoint.
+
+- **Mapa de plazas (`index.html` / `index.js`)**  
+  Las plazas de motocicleta **M1 (ID 49)** y **M2 (ID 48)** no actualizan correctamente su estado al ocupar/desocupar ni asignan la matrícula de forma persistente. Es necesario revisar la lógica JS asociada a estas IDs.

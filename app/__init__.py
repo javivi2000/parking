@@ -17,11 +17,10 @@ def create_app():
     db.init_app(app)
 
     from .routes import routes
-    from .views import views_bp  
+
 
     # Registro de Blueprints
     app.register_blueprint(routes, url_prefix='')
-    app.register_blueprint(views_bp, url_prefix='')
 
     return app
 

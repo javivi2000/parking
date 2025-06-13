@@ -1,8 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.sql import func
-from flask import Flask
 from datetime import datetime
+from data.excel_utils import cargar_plazas, cargar_solicitudes, cargar_tipos_plaza
+from sqlalchemy import func
+import pandas as pd
 
 db = SQLAlchemy()
 
@@ -24,10 +24,6 @@ class ParkingSpace:
 NUM_PLAZAS = 77
 plazas = [ParkingSpace(i) for i in range(NUM_PLAZAS)]
 
-# ==================================
-# Nuevos modelos
-# ==================================
-
 class Ambito(db.Model):
     __tablename__ = 'ambito'
     id = db.Column(db.Integer, primary_key=True)
@@ -47,6 +43,18 @@ class TipoPlaza(db.Model):
     __tablename__ = 'tipo_plaza'
     id = db.Column(db.Integer, primary_key=True)
     descripcion = db.Column(db.String(100), nullable=False)
+
+class Plaza(db.Model):
+    __tablename__ = 'plaza'
+    id = db.Column(db.Integer, primary_key=True)
+    estado = db.Column(db.Boolean, default=False)
+    tipo = db.Column(db.String(255))
+    ultima_ocupacion = db.Column(db.DateTime, nullable=True)
+    tipo_plaza_id = db.Column(db.Integer, db.ForeignKey('tipo_plaza.id'), nullable=True)
+    tipo_plaza = db.relationship('TipoPlaza', backref='plazas')
+    historial_ocupaciones = db.relationship(
+        'HistorialOcupacion', back_populates='plaza', cascade='all, delete-orphan'
+    )
 
 class Solicitante(db.Model):
     __tablename__ = 'solicitantes'
@@ -109,36 +117,12 @@ class Acompanante(db.Model):
     nombre = db.Column(db.String(255), nullable=False)
     numero = db.Column(db.Integer, nullable=False)
 
-class Plaza(db.Model):
-    __tablename__ = 'plaza'
-
-    id = db.Column(db.Integer, primary_key=True)
-    estado = db.Column(db.Boolean, default=False)  # False = libre, True = ocupado
-    tipo = db.Column(db.String(255))
-    ultima_ocupacion = db.Column(db.DateTime, nullable=True)  # Fecha de la última vez que se ocupó la plaza
-
-    historial_ocupaciones = db.relationship(
-        'HistorialOcupacion', 
-        back_populates='plaza', 
-        cascade='all, delete-orphan'
-    )
-
-    @property
-    def occupied(self):
-        return self.estado is True
-
-    def ocupar(self):
-        self.estado = True
-        self.ultima_ocupacion = datetime.utcnow()
-
-    def liberar(self):
-        self.estado = False
 
 class HistorialOcupacion(db.Model):
     __tablename__ = 'historial_ocupacion'
     id = db.Column(db.Integer, primary_key=True)
-    tipo_plaza_id = db.Column(db.Integer, db.ForeignKey('tipo_plaza.id'), nullable=False)
-    plaza_id = db.Column(db.Integer, db.ForeignKey('plaza.id'), nullable=False)
+    plaza_id = db.Column(db.Integer, db.ForeignKey('plaza.id'))
+    tipo_plaza_id = db.Column(db.Integer, db.ForeignKey('tipo_plaza.id')) 
     fecha = db.Column(db.Date, nullable=False)
     hora_inicio = db.Column(db.DateTime, nullable=False)
     hora_fin = db.Column(db.DateTime, nullable=True)
@@ -152,3 +136,108 @@ class RegistroClickPlaza(db.Model):
     plaza_id = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
+# ===========================
+# FUNCIONES PARA DATOS DE EXCEL
+# ===========================
+
+# Rutas a los excels
+EXCEL_PLAZAS = 'data/Plazas Movilidad y Voluntariado.xlsx'
+EXCEL_SOLICITUDES = 'data/Vehículos compartidos.xlsx'
+
+def cargar_plazas():
+    """Devuelve una lista de dicts con los datos de las plazas desde el Excel."""
+    df = pd.read_excel(EXCEL_PLAZAS)
+    # Buscar el nombre real de la columna ID (insensible a mayúsculas)
+    id_col = next((col for col in df.columns if col.strip().lower() in ['id', 'plaza id']), None)
+    tipo_col = next((col for col in df.columns if col.strip().lower() in ['tipo plaza', 'tipo_plaza_id']), None)
+    estado_col = next((col for col in df.columns if col.strip().lower() in ['ocupada', 'estado']), None)
+    ultima_col = next((col for col in df.columns if 'ultima' in col.strip().lower()), None)
+
+    plazas = []
+    for _, row in df.iterrows():
+        plazas.append({
+            'id': int(row[id_col]) if id_col and not pd.isnull(row[id_col]) else None,
+            'tipo': row.get(tipo_col) if tipo_col else None,
+            'estado': bool(row.get(estado_col, False)) if estado_col else False,
+            'ultima_ocupacion': row.get(ultima_col, None) if ultima_col else None
+        })
+    return plazas
+
+def cargar_solicitudes():
+    """Devuelve una lista de dicts con los datos de las solicitudes desde el Excel."""
+    df = pd.read_excel(EXCEL_SOLICITUDES)
+    solicitudes = []
+    for _, row in df.iterrows():
+        solicitudes.append({
+            'id': int(row['ID']) if not pd.isnull(row['ID']) else None,
+            'solicitante_id': int(row.get('Solicitante ID')) if not pd.isnull(row.get('Solicitante ID')) else None,
+            'tipo_plaza_id': row.get('Tipo Plaza') or row.get('tipo_plaza_id'),
+            'plaza_id': int(row.get('Plaza ID')) if not pd.isnull(row.get('Plaza ID')) else None,
+            'correo': row.get('Correo', ''),
+            'fecha': row.get('Fecha', ''),
+        })
+    return solicitudes
+
+def cargar_solicitantes():
+    """Devuelve una lista de dicts con los datos de los solicitantes desde el Excel de solicitudes."""
+    df = pd.read_excel(EXCEL_SOLICITUDES)
+    solicitantes = []
+    for _, row in df.iterrows():
+        solicitantes.append({
+            'id': int(row.get('Solicitante ID')) if not pd.isnull(row.get('Solicitante ID')) else None,
+            'nombre': row.get('Solicitante', ''),
+            'correo': row.get('Correo', ''),
+        })
+    return solicitantes
+
+def cargar_tipos_plaza():
+    """Devuelve los tipos de plaza únicos desde el Excel de plazas."""
+    df = pd.read_excel(EXCEL_PLAZAS)
+    return df['Tipo Plaza'].dropna().unique().tolist() if 'Tipo Plaza' in df else []
+
+def get_solicitudes_por_tipo(tipo_plaza):
+    """Devuelve las solicitudes filtradas por tipo de plaza."""
+    solicitudes = cargar_solicitudes()
+    return [s for s in solicitudes if s['tipo_plaza_id'] == tipo_plaza]
+
+def get_plazas_libres(tipo=None):
+    """Devuelve las plazas libres, opcionalmente filtradas por tipo."""
+    plazas = cargar_plazas()
+    libres = [p for p in plazas if not p['estado']]
+    if tipo:
+        libres = [p for p in libres if p['tipo'] == tipo]
+    return libres
+
+def get_plaza_by_id(plaza_id):
+    """Devuelve una plaza por su ID."""
+    plazas = cargar_plazas()
+    for plaza in plazas:
+        if plaza['id'] == plaza_id:
+            return plaza
+    return None
+
+def get_solicitante_by_id(solicitante_id):
+    """Devuelve un solicitante por su ID."""
+    solicitantes = cargar_solicitantes()
+    for s in solicitantes:
+        if s['id'] == solicitante_id:
+            return s
+    return None
+
+def get_solicitudes_by_solicitante(solicitante_id):
+    """Devuelve todas las solicitudes de un solicitante."""
+    solicitudes = cargar_solicitudes()
+    return [s for s in solicitudes if s['solicitante_id'] == solicitante_id]
+
+
+"""
+Este archivo:
+
+- Define todos los modelos de base de datos para solicitudes, plazas y usuarios.
+
+- Carga datos desde archivos Excel.
+
+- Proporciona funciones para consultar y manipular estos datos.
+
+- Incluye una clase ParkingSpace que simula ocupación de plazas para el mapa visual de la app.
+"""

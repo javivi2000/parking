@@ -1,15 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, flash
-from app.models import Solicitud, Plaza, TipoPlaza, HistorialOcupacion, RegistroClickPlaza
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify
+from app.models import Plaza, TipoPlaza, HistorialOcupacion, RegistroClickPlaza
 from app import db
-from datetime import datetime, date
-from sqlalchemy import extract, func, case, text
-import json  # Importación necesaria para manejar datos JSON
-from statsmodels.tsa.holtwinters import ExponentialSmoothing
-
+from datetime import datetime, timedelta
+from sqlalchemy import desc
+from data.excel_utils import cargar_plazas, cargar_solicitudes
+import unicodedata
 
 
 routes = Blueprint('routes', __name__)
-
 
 # Página principal: landing.html
 @routes.route('/', methods=['GET'])
@@ -91,7 +89,7 @@ def toggle_estado(plaza_id):
     return jsonify({'success': True, 'nuevo_estado': plaza.estado})
 
 
-# --- Registrar click plaza (sin retorno de contenido) ---
+# --- Registrar click plaza ---
 @routes.route('/registrar_click/<int:plaza_id>', methods=['POST'])
 def registrar_click(plaza_id):
     registro = RegistroClickPlaza(plaza_id=plaza_id)
@@ -99,187 +97,219 @@ def registrar_click(plaza_id):
     db.session.commit()
     return '', 204
 
+import unicodedata
+from flask import render_template
+from data.excel_utils import cargar_solicitudes
+
+def normaliza(texto):
+    if not texto:
+        return ''
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', str(texto).strip().lower())
+        if unicodedata.category(c) != 'Mn'
+    )
+
 @routes.route('/conteo_multiple', methods=['GET'])
 def conteo_multiple():
-    tipo_plaza_filtro = request.args.get('tipo_plaza', None)
-    fecha_filtro = request.args.get('fecha', None)
-
-    # Datos de ejemplo con las plazas solicitadas
-    datos_plazas = {
-        "Motocicletas autorizadas": {"total": 20, "ocupadas": 10, "disponibles": 10},
-        "Movilidad reducida": {"total": 15, "ocupadas": 8, "disponibles": 7},
-        "Mujer embarazada": {"total": 10, "ocupadas": 5, "disponibles": 5},
-        "Plaza asignada matrícula": {"total": 25, "ocupadas": 20, "disponibles": 5},
-        "Plaza MOVILIDAD otros centros": {"total": 30, "ocupadas": 15, "disponibles": 15},
-        "Plaza MOVILIDAD personal Of. Prov.": {"total": 40, "ocupadas": 30, "disponibles": 10},
-        "Plaza VOLUNTARIADO": {"total": 50, "ocupadas": 30, "disponibles": 20},
-        "Vehículos compartidos": {"total": 35, "ocupadas": 25, "disponibles": 10},
-        "Vehículos de Cruz Roja": {"total": 10, "ocupadas": 7, "disponibles": 3},
+    limites_plazas = {
+        "Vehiculos compartidos": 4, 
+        "Plaza asignada matrícula": 14,
+        "Vehículo Cruz Roja plaza asignada matrícula": 17,
+        "Voluntaríado": 10,
+        "Mujer embarazada": 2,
+        "Personal con movilidad reducida": 2,
+        "Motocicletas y ciclomotores autorizados": 9,
+        "Movilidad personal Coordinación, Secretaría y AL Alicante": 15,
+        "Bicicletas y patinetes autorizados": 0,
+        "Movilidad otros centros y visitas externos": 4,
     }
 
-    datos_graficos = {
-        "Motocicletas autorizadas": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [10, 12], "solicitudes": [5, 6]},
-        "Movilidad reducida": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [8, 9], "solicitudes": [3, 4]},
-        "Mujer embarazada": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [5, 6], "solicitudes": [2, 3]},
-        "Plaza asignada matrícula": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [20, 22], "solicitudes": [8, 10]},
-        "Plaza MOVILIDAD otros centros": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [15, 18], "solicitudes": [6, 7]},
-        "Plaza MOVILIDAD personal Of. Prov.": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [30, 32], "solicitudes": [10, 12]},
-        "Plaza VOLUNTARIADO": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [30, 35], "solicitudes": [10, 15]},
-        "Vehículos compartidos": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [25, 28], "solicitudes": [8, 9]},
-        "Vehículos de Cruz Roja": {"fechas": ["2025-06", "2025-07"], "ocupaciones": [7, 8], "solicitudes": [2, 3]},
+    tipos_plaza_fijos = [
+        "Vehiculos compartidos",
+        "Plaza asignada matrícula",
+        "Vehículo Cruz Roja plaza asignada matrícula",
+        "Voluntaríado",
+        "Mujer embarazada",
+        "Personal con movilidad reducida",
+        "Motocicletas y ciclomotores autorizados",
+        "Movilidad personal Coordinación, Secretaría y AL Alicante",
+        "Bicicletas y patinetes autorizados",
+        "Movilidad otros centros y visitas externos",
+    ]
+
+    MAPEO_TIPO_RESUMEN_A_BD = {
+        "Vehiculos compartidos": "Vehículos compartidos",
+        "Plaza asignada matrícula": "Plaza asignada matrícula",
+        "Vehículo Cruz Roja plaza asignada matrícula": "Vehículos de Cruz Roja",
+        "Voluntaríado": "Plaza VOLUNTARIADO",
+        "Mujer embarazada": "Mujer embarazada",
+        "Personal con movilidad reducida": "Movilidad reducida",
+        "Motocicletas y ciclomotores autorizados": "Motocicletas autorizadas",
+        "Movilidad personal Coordinación, Secretaría y AL Alicante": "Movilidad personal Coordinación, Secretaría y AL Alicante",
+        "Bicicletas y patinetes autorizados": "Bicicletas y patinetes autorizados",
+        "Movilidad otros centros y visitas externos": "Movilidad otros centros y visitas externos",
     }
 
-    # Aplicar filtro a los datos de la tabla
-    if tipo_plaza_filtro:
-        datos_plazas = {tipo: datos for tipo, datos in datos_plazas.items() if tipo == tipo_plaza_filtro}
-        datos_graficos = {tipo: datos for tipo, datos in datos_graficos.items() if tipo == tipo_plaza_filtro}
+    # Solo se consideran solicitudes con estado "Tarjeta Actualizada" o "Aprobado"
+    estados_validos = [normaliza('aprobado'), normaliza('tarjeta actualizada')]
+    solicitudes = cargar_solicitudes()
+    solicitudes_filtradas = [
+        s for s in solicitudes
+        if normaliza(s.get('estado', '')) in estados_validos
+    ]
 
-    # Calcular solicitudes y ratio de ocupación
-    datos_disponibilidad = {
-        tipo: {
-            "solicitadas": sum(datos["solicitudes"]),
-            "ratio_ocupacion": round((datos_plazas[tipo]["ocupadas"] / datos_plazas[tipo]["total"]) * 100, 2)
-            if datos_plazas[tipo]["total"] > 0 else 0
-        }
-        for tipo, datos in datos_graficos.items()
-    }
+    # Agrupa por tipo de plaza del Excel
+    solicitudes_por_tipo = {}
+    for resumen, nombre_excel in MAPEO_TIPO_RESUMEN_A_BD.items():
+        nombre_excel_norm = normaliza(nombre_excel)
+        solicitudes_por_tipo[resumen] = sum(
+            1 for s in solicitudes_filtradas
+            if normaliza(s.get('tipo_plaza_id', '')) == nombre_excel_norm
+        )
 
-    # Calcular totales
-    total_conjunto = {
-        "total": sum(datos["total"] for datos in datos_plazas.values()),
-        "ocupadas": sum(datos["ocupadas"] for datos in datos_plazas.values()),
-        "disponibles": sum(datos["disponibles"] for datos in datos_plazas.values()),
-    }
-    total_solicitadas = sum(
-        datos["solicitadas"] for datos in datos_disponibilidad.values()
-    )
-    total_ratio_ocupacion = (
-        (total_conjunto["ocupadas"] / total_conjunto["total"]) * 100
-        if total_conjunto["total"] > 0
-        else 0
-    )
+    solicitadas_por_tipo = solicitudes_por_tipo.copy()
+    total_solicitudes_por_tipo = solicitudes_por_tipo.copy()
 
-    # Calcular alertas de alta demanda
-    alertas = []
-    for tipo, datos in datos_graficos.items():
-        solicitudes = sum(datos["solicitudes"])
-        disponibles = datos_plazas.get(tipo, {}).get("disponibles", 0)
-        if solicitudes > disponibles:
-            alertas.append(
-                f"Alta demanda para {tipo}: {solicitudes} solicitudes y solo {disponibles} disponibles."
-            )
+    ocupadas_por_tipo = {}
+    disponibles_por_tipo = {}
+    porcentaje_ocupacion = {}
+
+    for resumen, bd in MAPEO_TIPO_RESUMEN_A_BD.items():
+        tipo = TipoPlaza.query.filter(TipoPlaza.descripcion == bd).first()
+        if tipo:
+            ocupadas = Plaza.query.filter_by(tipo_plaza_id=tipo.id, estado=True).count()
+        else:
+            ocupadas = 0
+        total = limites_plazas[resumen]
+        ocupadas_por_tipo[resumen] = ocupadas
+        disponibles_por_tipo[resumen] = total - ocupadas
+
+        # Plazas solicitadas: contar solicitudes aprobadas
+        solicitadas_por_tipo[resumen] = solicitudes_por_tipo.get(resumen, 0)
+
+        # Porcentaje de ocupación
+        if total > 0:
+            porcentaje = round((ocupadas / total) * 100, 1)
+        else:
+            porcentaje = 0
+        porcentaje_ocupacion[resumen] = porcentaje
+
+    total_plazas = sum(limites_plazas[tipo] for tipo in tipos_plaza_fijos)
+    total_ocupadas = sum(ocupadas_por_tipo[tipo] for tipo in tipos_plaza_fijos)
+    total_disponibles = sum(disponibles_por_tipo[tipo] for tipo in tipos_plaza_fijos)
+    total_solicitadas = sum(solicitadas_por_tipo[tipo] for tipo in tipos_plaza_fijos)
+    # % Ocupación global (sobre el total de plazas)
+    if total_plazas > 0:
+        total_porcentaje_ocupacion = round((total_ocupadas / total_plazas) * 100, 1)
+    else:
+        total_porcentaje_ocupacion = 0
+
+    plazas_excel = cargar_plazas()  # Lista de dicts con clave 'tipo'
+    total_plazas_excel = {}
+    for tipo in tipos_plaza_fijos:
+        total_plazas_excel[tipo] = sum(1 for p in plazas_excel if p['tipo_plaza'] == tipo)
+
+    # --- Cálculo del porcentaje de demanda ---
+    porcentaje_demanda = {}
+    for tipo in tipos_plaza_fijos:
+        total = total_plazas_excel.get(tipo, 0)
+        solicitadas = solicitadas_por_tipo.get(tipo, 0)
+        if total > 0:
+            porcentaje_demanda[tipo] = round((solicitadas / total) * 100, 1)
+        else:
+            porcentaje_demanda[tipo] = 0
+
+    ultima_ocupacion = {}
+    media_ocupacion = {}
+
+    for tipo in tipos_plaza_fijos:
+        # Obtén los ids de plazas de este tipo
+        plazas_ids = [p.id for p in Plaza.query.filter_by(tipo=tipo).all()]
+
+        ultima = (
+            HistorialOcupacion.query
+            .filter(HistorialOcupacion.plaza_id.in_(plazas_ids))
+            .order_by(desc(HistorialOcupacion.hora_inicio)) 
+            .first()
+        )
+        if ultima:
+            ultima_ocupacion[tipo] = {
+                'fecha': ultima.hora_inicio.strftime('%d/%m/%Y %H:%M'),  
+                'estado': 'ocupada' if ultima.hora_fin is None else 'libre'
+            }
+        else:
+            ultima_ocupacion[tipo] = {'fecha': 'Sin datos', 'estado': '-'}
+
+        # Media de ocupación (últimos 30 días)
+        desde = datetime.now() - timedelta(days=30)
+        registros = (
+            HistorialOcupacion.query
+            .filter(HistorialOcupacion.plaza_id.in_(plazas_ids))
+            .filter(HistorialOcupacion.hora_inicio >= desde)  
+            .all()
+        )
+        if registros:
+            ocupadas = sum(1 for r in registros if r.hora_fin is None)
+            media = round((ocupadas / len(registros)) * 100, 1)
+            media_ocupacion[tipo] = media
+        else:
+            media_ocupacion[tipo] = 0
+
+    total_solicitudes_por_tipo = {}
+    for tipo in tipos_plaza_fijos:
+        # Mostrar solicitudes aprobadas por tipo
+        total_solicitudes_por_tipo[tipo] = solicitudes_por_tipo.get(tipo, 0)
+
+    print("Valores únicos de estado normalizados:")
+    print(set(normaliza(s.get('estado', '')) for s in solicitudes))
+
+    print("Valores únicos de tipo_plaza_id en solicitudes:")
+    print(set(normaliza(str(s.get('tipo_plaza_id', ''))) for s in solicitudes_filtradas))
+    print("Valores normalizados del mapeo:")
+    print([normaliza(MAPEO_TIPO_RESUMEN_A_BD[tipo]) for tipo in tipos_plaza_fijos])
 
     return render_template(
         'conteo_multiple.html',
-        datos_plazas=datos_plazas,
-        datos_disponibilidad=datos_disponibilidad,
-        datos_graficos_json=json.dumps(datos_graficos),
-        total_conjunto=total_conjunto,
+        tipos_plaza=tipos_plaza_fijos,
+        limites_plazas=limites_plazas,  
+        solicitadas_por_tipo=solicitadas_por_tipo,
+        total_solicitudes_por_tipo=total_solicitudes_por_tipo,
+        ocupadas_por_tipo=ocupadas_por_tipo,
+        disponibles_por_tipo=disponibles_por_tipo,
+        porcentaje_ocupacion=porcentaje_ocupacion,
+        total_plazas=total_plazas,
+        total_ocupadas=total_ocupadas,
+        total_disponibles=total_disponibles,
         total_solicitadas=total_solicitadas,
-        total_ratio_ocupacion=round(total_ratio_ocupacion, 2),
-        alertas=alertas,
-        datos_plazas_todos=json.dumps({
-            "Motocicletas autorizadas": {"total": 20, "ocupadas": 10, "disponibles": 10},
-            "Movilidad reducida": {"total": 15, "ocupadas": 8, "disponibles": 7},
-            "Mujer embarazada": {"total": 10, "ocupadas": 5, "disponibles": 5},
-            "Plaza asignada matrícula": {"total": 25, "ocupadas": 20, "disponibles": 5},
-            "Plaza MOVILIDAD otros centros": {"total": 30, "ocupadas": 15, "disponibles": 15},
-            "Plaza MOVILIDAD personal Of. Prov.": {"total": 40, "ocupadas": 30, "disponibles": 10},
-            "Plaza VOLUNTARIADO": {"total": 50, "ocupadas": 30, "disponibles": 20},
-            "Vehículos compartidos": {"total": 35, "ocupadas": 25, "disponibles": 10},
-            "Vehículos de Cruz Roja": {"total": 10, "ocupadas": 7, "disponibles": 3},
-        })  # <-- Pasa aquí todos los datos, no los filtrados
+        total_porcentaje_ocupacion=total_porcentaje_ocupacion,
+        porcentaje_demanda=porcentaje_demanda,
+        total_plazas_excel=total_plazas_excel,
+        ultima_ocupacion=ultima_ocupacion,
+        media_ocupacion=media_ocupacion,
     )
 
+# Mapeo de nombres resumen -> nombres en la BBDD
+MAPEO_TIPO_RESUMEN_A_BD = {
+    "Vehiculos compartidos": "Vehículos compartidos",
+    "Plaza asignada matrícula": "Plaza asignada matrícula",
+    "Vehículo Cruz Roja plaza asignada matrícula": "Vehículos de Cruz Roja",
+    "Voluntaríado": "Plaza VOLUNTARIADO",
+    "Mujer embarazada": "Mujer embarazada",
+    "Personal con movilidad reducida": "Movilidad reducida",
+    "Motocicletas y ciclomotores autorizados": "Motocicletas autorizadas",
+    "Movilidad personal Coordinación, Secretaría y AL Alicante": "Movilidad personal Coordinación, Secretaría y AL Alicante",
+    "Bicicletas y patinetes autorizados": "Bicicletas y patinetes autorizados",  
+    "Movilidad otros centros y visitas externos": "Movilidad otros centros y visitas externos",
+}
 
 
-# --- Solicitar plaza (simplificado, implementar según necesidad) ---
-@routes.route('/solicitar', methods=['POST'])
-def solicitar():
-    tipo_plaza_nombre = request.form.get('tipo_plaza')
-    # Aquí implementar lógica para crear Solicitud y asignar plaza
-    # Ejemplo simplificado:
-    tipo_plaza = TipoPlaza.query.filter_by(descripcion=tipo_plaza_nombre).first()
-    if not tipo_plaza:
-        flash("Tipo de plaza no válido.", "danger")
-        return redirect(url_for('routes.mapa'))
+"""
+Define las rutas principales de la app de gestión de aparcamiento:
 
-    solicitud = Solicitud(
-        tipo_plaza_id=tipo_plaza.id,
-        fecha_solicitud=datetime.utcnow(),
-        estado='pendiente'
-        # Otros campos que necesites
-    )
-    db.session.add(solicitud)
-    db.session.commit()
+- '/' y '/mapa': Renderiza el mapa interactivo de plazas y permite cambiar su estado.
+- '/conteo_multiple': Muestra estadísticas de ocupación por tipo de plaza.
+- '/cargar_datos_excel': Importa datos de plazas desde un archivo Excel.
+- '/toggle_estado/<id>': Alterna el estado de una plaza y guarda el historial.
 
-    # Lógica para asignar plaza libre
-    plaza_libre = Plaza.query.filter_by(tipo_plaza_id=tipo_plaza.id, estado=False).first()
-    if plaza_libre:
-        plaza_libre.estado = True
-        db.session.commit()
-        flash(f"Plaza asignada: {plaza_libre.id}", "success")
-    else:
-        flash("No hay plazas libres para este tipo.", "warning")
-
-    return redirect(url_for('routes.mapa'))
-
-
-# --- Reservar plaza voluntariado ---
-@routes.route('/parking_access_volunteer', methods=['GET', 'POST'])
-def parking_access_volunteer():
-    if request.method == 'POST':
-        tipo_plaza_id = int(request.form['tipo_plaza_id'])
-        plaza_libre = Plaza.query.filter_by(tipo_plaza_id=tipo_plaza_id, estado=False).first()
-        if plaza_libre:
-            plaza_libre.estado = True
-            db.session.commit()
-            flash(f'¡Plaza {plaza_libre.tipo} reservada correctamente!', 'success')
-        else:
-            flash('No quedan plazas disponibles de ese tipo.', 'danger')
-        return redirect(url_for('routes.parking_access_volunteer'))
-
-    return render_template('parking_access_volunteer.html')
-
-@routes.route('/toggle/<int:id>', methods=['POST'])
-def toggle_plaza(id):
-    from app import db
-    from app.models import Plaza
-    plaza = db.session.get(Plaza, id)
-    if plaza:
-        plaza.estado = 0 if plaza.estado else 1
-        db.session.commit()
-    return redirect(url_for('routes.mapa'))
-
-@routes.route('/solicitudes_totales')
-def solicitudes_totales():
-    solicitudes_rows = db.session.execute(text("""
-        SELECT tipo_plaza_id, COUNT(*) AS total_solicitudes
-        FROM solicitudes
-        GROUP BY tipo_plaza_id;
-    """))
-    resultados = [{"tipo_plaza_id": row[0], "total_solicitudes": row[1]} for row in solicitudes_rows]
-    return jsonify(resultados)
-
-@routes.route('/insertar_solicitud', methods=['POST'])
-def insertar_solicitud():
-    db.session.execute(text("""
-        INSERT INTO solicitudes (solicitante_id, correo, ambito_id, frecuencia_id, tipo_plaza_id, mifare, plaza_id)
-        VALUES (:solicitante_id, :correo, :ambito_id, :frecuencia_id, :tipo_plaza_id, :mifare, :plaza_id)
-    """), {
-        "solicitante_id": 1,
-        "correo": "test@example.com",
-        "ambito_id": 1,
-        "frecuencia_id": 1,
-        "tipo_plaza_id": 1,
-        "mifare": "si",
-        "plaza_id": None
-    })
-    db.session.commit()
-    return jsonify({"success": True, "message": "Solicitud insertada correctamente"})
-
-def predecir_ocupacion(datos_historicos):
-    modelo = ExponentialSmoothing(datos_historicos, trend="add", seasonal="add", seasonal_periods=7)
-    ajuste = modelo.fit()
-    predicciones = ajuste.forecast(7)  # Predicción para los próximos 7 días
-    return predicciones
+Utiliza los modelos Plaza, TipoPlaza, RegistroClickPlaza y HistorialOcupacion.
+"""
